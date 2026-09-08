@@ -74,7 +74,10 @@ export default function OrderDetail() {
 
         {/* Header */}
         <div className="odetail-header">
-          <div>
+          <div className="odetail-header-copy">
+            <span className="odetail-kicker">
+              {order.type === 'DELIVERY' ? '🛵 Pedido por delivery' : '🍽️ Reserva en restaurante'}
+            </span>
             <p className="odetail-number">Pedido #{order.orderNumber?.slice(-8)}</p>
             <p className="odetail-date">{date} · {time}</p>
           </div>
@@ -82,7 +85,7 @@ export default function OrderDetail() {
         </div>
 
         {/* Barra de progreso */}
-        <div className="odetail-card">
+        <div className="odetail-card odetail-card--progress">
           <h2 className="odetail-card-title">Estado del pedido</h2>
           <OrderProgressBar status={order.status} type={order.type} />
         </div>
@@ -153,14 +156,16 @@ export default function OrderDetail() {
         )}
 
         {/* Restaurante */}
-        <div className="odetail-card">
+        <div className="odetail-card odetail-card--restaurant">
           <h2 className="odetail-card-title">Restaurante</h2>
           <div className="odetail-info-rows">
             <div className="odetail-info-row">
-              <MapPin size={15} className="odetail-icon" />
+              <div className="odetail-restaurant-avatar">
+                {order.restaurant?.name?.charAt(0).toUpperCase()}
+              </div>
               <div>
-                <p className="odetail-info-value" style={{ fontWeight: 700 }}>{order.restaurant?.name}</p>
-                <p className="odetail-info-sub">{order.restaurant?.address}</p>
+                <p className="odetail-restaurant-name">{order.restaurant?.name}</p>
+                <p className="odetail-info-sub"><MapPin size={13} /> {order.restaurant?.address}</p>
               </div>
             </div>
             {order.restaurant?.phone && (

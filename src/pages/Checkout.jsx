@@ -60,13 +60,8 @@ export default function Checkout() {
     // Se abre inmediatamente para que el navegador no bloquee la pestaña
     // después de esperar las llamadas al backend.
     const mpWindow = selectedPaymentMethod === 'MERCADOPAGO_TEST'
-      ? window.open('about:blank', 'mercadopago_test_checkout')
+      ? window.open('', '_blank')
       : null
-
-    if (mpWindow) {
-      mpWindow.document.title = 'Abriendo Mercado Pago...'
-      mpWindow.document.body.innerHTML = '<p style="font-family:sans-serif;padding:24px">Abriendo Mercado Pago de prueba...</p>'
-    }
 
     setLoading(true)
 

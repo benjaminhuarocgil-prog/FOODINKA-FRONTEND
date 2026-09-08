@@ -1,21 +1,189 @@
-/* Verificar pago (Mercado Pago) */
-.odetail-check-payment-btn {
-  margin-top: 14px;
+.odetail {
+  min-height: 100vh;
+  background: radial-gradient(circle at 8% 0%, rgba(232, 93, 36, .1), transparent 28rem), linear-gradient(180deg, #fffaf7 0, #f8fafc 24rem);
+  color: #172033;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.odetail-inner {
+  width: min(940px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 30px 0 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.odetail-back {
+  align-self: flex-start;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #fff;
-  border: 1px solid #e85d24;
-  color: #e85d24;
-  font-weight: 600;
-  font-size: 0.875rem;
-  padding: 9px 16px;
+  padding: 9px 13px;
+  border: 0;
   border-radius: 10px;
+  background: transparent;
+  color: #64748b;
+  font: inherit;
+  font-size: .86rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: color .18s ease, background .18s ease, transform .18s ease;
 }
-.odetail-check-payment-btn:hover:not(:disabled) { background: #fff7ed; }
-.odetail-check-payment-btn:disabled { opacity: 0.6; cursor: default; }
 
+.odetail-back:hover { color: #d94f19; background: #fff0e9; transform: translateX(-2px); }
+
+.odetail-header {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px 30px;
+  border: 1px solid #ffd9c8;
+  border-radius: 22px;
+  background: linear-gradient(125deg, #fff 0%, #fff8f4 62%, #ffe4d5 100%);
+  box-shadow: 0 18px 45px rgba(109, 52, 27, .09);
+}
+
+.odetail-header::after {
+  content: "";
+  position: absolute;
+  right: -44px;
+  bottom: -72px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: rgba(232, 93, 36, .08);
+  pointer-events: none;
+}
+
+.odetail-header-copy, .odetail-header .osb { position: relative; z-index: 1; }
+.odetail-kicker { display: inline-flex; margin-bottom: 8px; color: #c94d1b; font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.odetail-number { margin: 0; color: #171b26; font-size: clamp(1.45rem, 4vw, 2rem); font-weight: 850; letter-spacing: -.035em; }
+.odetail-date { margin: 7px 0 0; color: #7a8497; font-size: .86rem; text-transform: capitalize; }
+
+.odetail-card {
+  padding: 22px 24px;
+  border: 1px solid #eceef2;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 8px 28px rgba(15, 23, 42, .055);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.odetail-card:hover { border-color: #f2d6c9; box-shadow: 0 12px 32px rgba(15, 23, 42, .075); }
+.odetail-card--progress { border-color: #f6d6c7; }
+.odetail-card-title { display: flex; align-items: center; gap: 9px; margin: 0 0 18px; color: #202736; font-size: .98rem; font-weight: 800; }
+.odetail-card-title svg { color: #e85d24; }
+.odetail-info-rows { display: grid; gap: 12px; }
+
+.odetail-info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  min-width: 0;
+  padding: 13px 14px;
+  border-radius: 13px;
+  background: #f8fafc;
+}
+
+.odetail-info-row > div:not(.odetail-restaurant-avatar) { min-width: 0; flex: 1; }
+.odetail-icon { flex: 0 0 auto; margin-top: 2px; color: #e85d24; }
+.odetail-info-label { margin: 0 0 4px; color: #8b95a7; font-size: .69rem; font-weight: 800; letter-spacing: .055em; text-transform: uppercase; }
+.odetail-info-value { margin: 0; color: #263043; font-size: .9rem; font-weight: 650; line-height: 1.45; }
+.odetail-info-sub { display: flex; align-items: center; gap: 5px; margin: 4px 0 0; color: #7c8798; font-size: .8rem; line-height: 1.45; }
+.odetail-card--restaurant { background: linear-gradient(135deg, #fff 55%, #fff7f2); }
+
+.odetail-restaurant-avatar, .odetail-driver-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #f47a43, #dc4d18);
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 850;
+  box-shadow: 0 7px 18px rgba(232, 93, 36, .22);
+}
+
+.odetail-restaurant-name, .odetail-driver-name { margin: 0; color: #1d2432; font-size: .98rem; font-weight: 800; }
+.odetail-card--driver { border-color: #dbeafe; background: linear-gradient(135deg, #fff, #f3f8ff); }
+.odetail-driver { display: flex; align-items: center; gap: 14px; }
+.odetail-driver-avatar { background: linear-gradient(145deg, #4679e8, #2856bc); box-shadow: 0 7px 18px rgba(37, 99, 235, .2); }
+.odetail-driver-phone { margin: 4px 0 0; color: #68758a; font-size: .82rem; }
+.odetail-items { display: flex; flex-direction: column; gap: 2px; }
+
+.odetail-item {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 4px;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+.odetail-item:last-child { border-bottom: 0; }
+.odetail-item img { width: 62px; height: 62px; border-radius: 14px; object-fit: cover; background: #f1f2f4; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .04); }
+.odetail-item-info { min-width: 0; }
+.odetail-item-name { overflow: hidden; margin: 0 0 5px; color: #202736; font-size: .94rem; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+.odetail-item-qty { margin: 0; color: #8a94a5; font-size: .79rem; }
+.odetail-item-subtotal { color: #30394a; font-size: .9rem; font-weight: 800; white-space: nowrap; }
+
+.odetail-totals { width: min(100%, 390px); margin: 17px 0 0 auto; padding: 17px 18px; border-radius: 15px; background: #fff8f4; }
+.odetail-total-row { display: flex; justify-content: space-between; gap: 20px; padding: 5px 5px 0; color: #697386; font-size: .84rem; }
+.odetail-total-row--discount { color: #15915d; }
+.odetail-total-row--total { margin-top: 8px; padding-top: 13px; border-top: 1px dashed #edbda7; color: #1e2533; font-size: 1.08rem; font-weight: 850; }
+.odetail-total-row--total span:last-child { color: #df541e; }
+.odetail-notes { margin: 0; padding: 15px 17px; border-left: 3px solid #e85d24; border-radius: 0 12px 12px 0; background: #fff8f4; color: #596477; font-size: .88rem; line-height: 1.65; }
+
+.odetail-check-payment-btn {
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 9px 17px;
+  border: 1px solid #e85d24;
+  border-radius: 11px;
+  background: #fff;
+  color: #dd531d;
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background .18s ease, color .18s ease, box-shadow .18s ease;
+}
+
+.odetail-check-payment-btn:hover:not(:disabled) { background: #e85d24; color: #fff; box-shadow: 0 8px 18px rgba(232, 93, 36, .22); }
+.odetail-check-payment-btn:disabled { opacity: .6; cursor: default; }
 .odetail-spin { animation: odetail-spin 1s linear infinite; }
-@keyframes odetail-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes odetail-spin { to { transform: rotate(360deg); } }
+
+.odetail-skeleton-wrap { width: min(940px, calc(100% - 32px)); margin: 0 auto; padding: 36px 0; display: grid; gap: 16px; }
+.odetail-skeleton { height: 120px; border-radius: 18px; background: linear-gradient(90deg, #f1f2f4 25%, #fafafa 50%, #f1f2f4 75%); background-size: 220% 100%; animation: odetail-loading 1.3s infinite; }
+@keyframes odetail-loading { to { background-position: -220% 0; } }
+
+.odetail-error { width: min(480px, calc(100% - 32px)); margin: 72px auto; padding: 36px; border: 1px solid #f1e4de; border-radius: 20px; background: #fff; text-align: center; box-shadow: 0 16px 40px rgba(15, 23, 42, .07); }
+.odetail-error p { margin: 0 0 18px; color: #31394a; font-size: 1.05rem; font-weight: 750; }
+.odetail-error button { padding: 10px 18px; border: 0; border-radius: 10px; background: #e85d24; color: #fff; font-weight: 750; cursor: pointer; }
+
+@media (min-width: 760px) {
+  .odetail-info-rows:has(.odetail-info-row:nth-child(2)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 620px) {
+  .odetail-inner { width: min(100% - 22px, 940px); padding-top: 18px; }
+  .odetail-header { align-items: flex-start; flex-direction: column; padding: 22px 20px; }
+  .odetail-header .osb { align-self: flex-start; }
+  .odetail-card { padding: 19px 16px; border-radius: 16px; }
+  .odetail-item { grid-template-columns: 52px minmax(0, 1fr) auto; gap: 10px; }
+  .odetail-item img { width: 52px; height: 52px; border-radius: 12px; }
+  .odetail-item-subtotal { font-size: .82rem; }
+  .odetail-totals { width: auto; }
+  .odetail-check-payment-btn { width: 100%; }
+}
