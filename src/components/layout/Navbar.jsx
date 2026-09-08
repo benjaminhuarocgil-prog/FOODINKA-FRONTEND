@@ -24,7 +24,9 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
   const isAdmin           = role === 'ADMIN'
   const isDriver          = role === 'DELIVERY'
   const isRestaurantOwner = role === 'RESTAURANT_OWNER'
-  const isConsumer        = role === 'CONSUMER'
+  // Una sesión sin rol especializado también es tratada como cliente.
+  // Así el menú no desaparece mientras termina de cargar el perfil de la BD.
+  const isConsumer        = isAuthenticated && !isAdmin && !isDriver && !isRestaurantOwner
 
   const handleLogout = () => {
     setProfileOpen(false)
@@ -136,7 +138,7 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
         </div>
 
         {/* Hamburguesa mobile */}
-        {(!isAuthenticated || isConsumer) && (
+        {isConsumer && (
           <button
             className={`navbar-hamburger ${isConsumer ? 'navbar-hamburger--consumer' : ''}`}
             onClick={() => setMenuOpen(m => !m)}
