@@ -10,7 +10,7 @@ import LogoUploader from '../components/ui/LogoUploader.jsx'
 import { useCurrentUser } from '../hooks/useCurrentUser.js'
 import {
   useUpdateProfile, useUpdateRestaurant,
-  useRestaurantProducts, useCreateProduct,
+  useRestaurantProducts, useRestaurantCategories, useCreateCategory, useCreateProduct,
   useUpdateProduct, useDeleteProduct, useToggleProduct,
   useUpdateDriverVehicle,
 } from '../hooks/useProfile.js'
@@ -80,18 +80,34 @@ function ProductModal({ restaurantId, product, onClose }) {
   const isEdit = !!product
   const create = useCreateProduct(restaurantId)
   const update = useUpdateProduct(restaurantId)
+  const { data: categories = [], isLoading: categoriesLoading } = useRestaurantCategories(restaurantId)
+  const createCategory = useCreateCategory(restaurantId)
   const saving = create.isPending || update.isPending
+  const [newCategory, setNewCategory] = useState('')
   const [form, setForm] = useState({
     name: product?.name || '', description: product?.description || '',
     type: product?.type || 'DISH', price: product?.price || '', imageUrl: product?.imageUrl || '',
+    categoryId: product?.category?.id || '',
   })
   const set = f => e => setForm(v => ({ ...v, [f]: e.target.value }))
 
   const handleSubmit = async () => {
-    const payload = { ...form, price: parseFloat(form.price) }
+    const payload = {
+      ...form,
+      price: parseFloat(form.price),
+      categoryId: form.categoryId || undefined,
+    }
     if (isEdit) await update.mutateAsync({ id: product.id, ...payload })
     else        await create.mutateAsync(payload)
     onClose()
+  }
+
+  const handleCreateCategory = async () => {
+    const name = newCategory.trim()
+    if (!name || createCategory.isPending) return
+    const category = await createCategory.mutateAsync(name)
+    setForm(value => ({ ...value, categoryId: category.id }))
+    setNewCategory('')
   }
   return (
     <div className="pf-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
@@ -109,6 +125,45 @@ function ProductModal({ restaurantId, product, onClose }) {
                   onClick={() => setForm(v => ({ ...v, type: t.value }))}>{t.label}</button>
               ))}
             </div>
+          </div>
+          <div className="pf-field">
+            <label className="pf-field-label">Categoría del menú</label>
+            <select
+              className="pf-input pf-select"
+              value={form.categoryId}
+              onChange={set('categoryId')}
+              disabled={categoriesLoading}
+            >
+              <option value="">Menú general</option>
+              {categories.map(category => (
+                <option key={category.id} value={category.id}>{category.name}</option>
+              ))}
+            </select>
+            <div className="pf-new-category">
+              <input
+                className="pf-input"
+                value={newCategory}
+                onChange={event => setNewCategory(event.target.value)}
+                onKeyDown={event => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault()
+                    handleCreateCategory()
+                  }
+                }}
+                placeholder="Ej: Entradas, Platos principales..."
+                maxLength={50}
+              />
+              <button
+                type="button"
+                className="pf-btn-category"
+                onClick={handleCreateCategory}
+                disabled={!newCategory.trim() || createCategory.isPending}
+              >
+                {createCategory.isPending ? <Loader2 size={14} className="pf-spin" /> : <Plus size={14} />}
+                Crear
+              </button>
+            </div>
+            <p className="pf-field-help">Organiza tus productos en secciones visibles para tus clientes.</p>
           </div>
           <div className="pf-field">
             <label className="pf-field-label">Nombre *</label>

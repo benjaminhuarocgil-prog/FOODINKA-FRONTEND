@@ -88,6 +88,18 @@
 }
 .pf-input:focus { border-color: #e85d24; }
 .pf-textarea { height: auto; padding: 10px 12px; resize: vertical; }
+.pf-select { cursor: pointer; background: #fff; }
+.pf-new-category { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; margin-top: 8px; }
+.pf-btn-category {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-width: 84px; height: 40px; padding: 0 13px;
+  border: 1.5px solid #e85d24; border-radius: 8px;
+  background: #fff7f4; color: #d94f19;
+  font-size: .8rem; font-weight: 700; cursor: pointer;
+}
+.pf-btn-category:hover:not(:disabled) { background: #e85d24; color: #fff; }
+.pf-btn-category:disabled { opacity: .55; cursor: default; }
+.pf-field-help { margin: 7px 0 0; color: #9ca3af; font-size: .72rem; line-height: 1.4; }
 
 /* ── Botones icono ─────────────────────────────────────── */
 .pf-icon-btn {

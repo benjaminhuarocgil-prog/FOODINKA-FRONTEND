@@ -59,6 +59,36 @@ export function useRestaurantProducts(restaurantId) {
   })
 }
 
+// ── Categorías del menú ────────────────────────────────────────
+export function useRestaurantCategories(restaurantId) {
+  return useQuery({
+    queryKey: ['restaurant-categories', restaurantId],
+    queryFn: async () => {
+      const res = await api.get(`/api/v1/restaurants/${restaurantId}/categories`)
+      return res.data.data || []
+    },
+    enabled: !!restaurantId,
+  })
+}
+
+export function useCreateCategory(restaurantId) {
+  const { getAccessTokenSilently } = useAuth0()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (name) => {
+      await withAuth(getAccessTokenSilently)
+      const res = await api.post(`/api/v1/restaurants/${restaurantId}/categories`, { name })
+      return res.data.data
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['restaurant-categories', restaurantId] })
+      qc.invalidateQueries({ queryKey: ['restaurant', restaurantId] })
+      toast.success('Categoría creada')
+    },
+    onError: (err) => toast.error(err?.response?.data?.message || 'No se pudo crear la categoría'),
+  })
+}
+
 // ── Crear producto ─────────────────────────────────────────────
 export function useCreateProduct(restaurantId) {
   const { getAccessTokenSilently } = useAuth0()
