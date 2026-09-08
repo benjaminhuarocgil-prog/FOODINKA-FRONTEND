@@ -1,15 +1,16 @@
 /* Contador */
 .rgrid-count {
-  font-size: 0.85rem;
-  color: #9ca3af;
-  margin: 0 0 16px;
+  font-size: .78rem;
+  color: #858585;
+  margin: 0 0 18px;
+  font-weight:600;
 }
 
 /* Grilla responsive */
 .rgrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 28px 20px;
 }
 
 /* ── Skeleton ──────────────────────────────────────────────── */
@@ -21,7 +22,7 @@
 }
 
 .rgrid-skeleton-img {
-  height: 160px;
+  aspect-ratio:1.55/1;
   background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
@@ -78,6 +79,8 @@
 }
 
 /* Responsive */
+@media (max-width: 1100px) {.rgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width: 800px) {.rgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width: 640px) {
   .rgrid {
     grid-template-columns: 1fr;

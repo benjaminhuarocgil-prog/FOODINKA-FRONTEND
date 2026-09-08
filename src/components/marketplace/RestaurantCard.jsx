@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Clock, Bike, ChevronRight, CalendarCheck } from 'lucide-react'
+import { Clock, Bike, ChevronRight, CalendarCheck, MapPin } from 'lucide-react'
 import './RestaurantCard.css'
 
 const BANNER_PLACEHOLDER = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=80'
@@ -59,8 +59,8 @@ export default function RestaurantCard({ restaurant }) {
           {categoryLabel}
         </span>
         <div className="rcard-services">
-          {isDeliveryEnabled    && <span className="rcard-service" title="Delivery">🛵</span>}
-          {isReservationEnabled && <span className="rcard-service" title="Reservas">📅</span>}
+          {isDeliveryEnabled    && <span className="rcard-service" title="Delivery"><Bike size={14}/></span>}
+          {isReservationEnabled && <span className="rcard-service" title="Reservas"><CalendarCheck size={14}/></span>}
         </div>
       </div>
 
@@ -82,7 +82,7 @@ export default function RestaurantCard({ restaurant }) {
 
           <div className="rcard-title-wrap">
             <h3 className="rcard-name">{name}</h3>
-            <p className="rcard-district">📍 {district}</p>
+            <p className="rcard-district"><MapPin size={12}/> {district}</p>
           </div>
         </div>
 

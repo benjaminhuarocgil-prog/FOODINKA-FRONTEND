@@ -18,7 +18,7 @@ const DISTRICTS = [
   'Lince', 'Jesús María', 'Magdalena',
 ]
 
-export default function CategoryFilter({ filters, onChange }) {
+export default function CategoryFilter({ filters, onChange, categoriesOnly = false, filtersOnly = false }) {
 
   const handleCategory = (value) => {
     onChange({ ...filters, category: value })
@@ -47,7 +47,7 @@ export default function CategoryFilter({ filters, onChange }) {
     <div className="catfilter">
 
       {/* Chips de categoría */}
-      <div className="catfilter-chips">
+      {!filtersOnly && <div className="catfilter-chips">
         {CATEGORIES.map(cat => (
           <button
             key={cat.value}
@@ -58,10 +58,10 @@ export default function CategoryFilter({ filters, onChange }) {
             <span>{cat.label}</span>
           </button>
         ))}
-      </div>
+      </div>}
 
       {/* Filtros secundarios */}
-      <div className="catfilter-secondary">
+      {!categoriesOnly && <div className="catfilter-secondary">
 
         {/* Distrito */}
         <select
@@ -98,7 +98,7 @@ export default function CategoryFilter({ filters, onChange }) {
           </button>
         )}
 
-      </div>
+      </div>}
     </div>
   )
 }

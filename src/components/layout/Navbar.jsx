@@ -4,13 +4,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import {
   ShoppingCart, Menu, X, User, LogOut,
-  LayoutDashboard, Bike, ClipboardList, Store, UtensilsCrossed, ArrowRight,
+  LayoutDashboard, Bike, ClipboardList, Store, UtensilsCrossed, ArrowRight, MapPin, Search,
 } from 'lucide-react'
 import { useCartStore } from '../../store/cartStore.js'
 import { useCurrentUser } from '../../hooks/useCurrentUser.js'
 import './Navbar.css'
 
-export default function Navbar({ cartCount }) {
+export default function Navbar({ cartCount, searchValue = '', onSearchChange, district = 'Lima' }) {
   const { isAuthenticated, loginWithRedirect, logout, user } = useAuth0()
   const { data: dbUser } = useCurrentUser()
   const [menuOpen,    setMenuOpen]    = useState(false)
@@ -59,10 +59,18 @@ export default function Navbar({ cartCount }) {
           />
         </Link>
 
+        <button className="navbar-location" type="button">
+          <MapPin size={19}/><span><small>Entregar en</small><strong>{district}</strong></span>
+        </button>
+
+        {onSearchChange && <label className="navbar-search"><Search size={18}/><input value={searchValue} onChange={event => onSearchChange(event.target.value)} placeholder="Busca restaurantes o platos"/></label>}
+
         {/* Acciones desktop */}
         <div className="navbar-actions">
+          {isAuthenticated && <button className="navbar-orders" onClick={() => go('/orders')}>Mis pedidos</button>}
           <Link to="/cart" className="navbar-cart">
             <ShoppingCart size={20} />
+            <span className="navbar-cart-label">Carrito</span>
             {count > 0 && <span className="navbar-cart-badge">{count}</span>}
           </Link>
 

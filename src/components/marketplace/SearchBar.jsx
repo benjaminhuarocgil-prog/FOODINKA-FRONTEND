@@ -12,7 +12,7 @@ export default function SearchBar({ value, onChange }) {
       <Search size={18} className="searchbar-icon" />
       <input
         type="text"
-        placeholder="Buscar restaurantes, cocinas..."
+        placeholder="Busca restaurantes o platos"
         value={value}
         onChange={e => onChange(e.target.value)}
         onFocus={() => setFocused(true)}
