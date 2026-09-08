@@ -5,6 +5,7 @@ import { BrowserRouter, useNavigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
 import App from './App.jsx'
+import './index.css'
 
 // Cliente de React Query — caché global de todas las llamadas al backend
 const queryClient = new QueryClient({

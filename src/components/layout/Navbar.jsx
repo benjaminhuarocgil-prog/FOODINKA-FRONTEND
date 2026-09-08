@@ -65,7 +65,7 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
 
   return (
     <nav className="navbar">
-      <div className="navbar-inner">
+      <div className={`navbar-inner ${!isAuthenticated ? 'navbar-inner--guest' : ''}`}>
 
         {isConsumer && (
           <button
@@ -96,7 +96,7 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
         {onSearchChange && <label className="navbar-search"><Search size={18}/><input value={searchValue} onChange={event => onSearchChange(event.target.value)} placeholder="Busca restaurantes o platos"/></label>}
 
         {/* Acciones desktop */}
-        <div className="navbar-actions">
+        <div className={`navbar-actions ${!isAuthenticated ? 'navbar-actions--guest' : ''}`}>
           {isAuthenticated && <button className="navbar-orders" onClick={() => go('/orders')}>Mis pedidos</button>}
           <Link to="/cart" className="navbar-cart">
             <ShoppingCart size={20} />
