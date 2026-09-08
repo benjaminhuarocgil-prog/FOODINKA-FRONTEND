@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import toast from 'react-hot-toast'
 import { useCartStore } from '../store/cartStore.js'
-import { useRestaurant } from '../hooks/useRestaurants.js'
 import { useApi } from '../hooks/useApi.js'
 import Navbar from '../components/layout/Navbar.jsx'
 import OrderTypeSelector from '../components/checkout/OrderTypeSelector.jsx'
@@ -18,8 +17,6 @@ export default function Checkout() {
   const api       = useApi()
   const { user }  = useAuth0()
   const { items, restaurantId, restaurantName, getSubtotal, getTotalItems, clearCart } = useCartStore()
-  const { data: restaurantRes } = useRestaurant(restaurantId)
-  const mpAvailable = restaurantRes?.data?.mpConnected === true
 
   const [orderType,    setOrderType]    = useState('DELIVERY')  // 'DELIVERY' | 'RESERVATION'
   const [paymentMethod, setPaymentMethod] = useState('CASH_ON_DELIVERY') // 'MERCADOPAGO' | 'YAPE' | 'CASH_ON_DELIVERY'
@@ -46,7 +43,7 @@ export default function Checkout() {
     return null
   }
 
-  const handleSubmit = async () => {
+  const processCheckout = async (selectedPaymentMethod) => {
     // ── Validaciones ────────────────────────────────────────
     if (orderType === 'DELIVERY') {
       if (!deliveryAddress.trim()) return toast.error('Ingresa la dirección de entrega')
@@ -58,6 +55,17 @@ export default function Checkout() {
       if (!reservationDate) return toast.error('Selecciona la fecha de la reserva')
       if (!reservationTime) return toast.error('Selecciona la hora de la reserva')
       if (!partySize || partySize < 1) return toast.error('Ingresa el número de personas')
+    }
+
+    // Se abre inmediatamente para que el navegador no bloquee la pestaña
+    // después de esperar las llamadas al backend.
+    const mpWindow = selectedPaymentMethod === 'MERCADOPAGO_TEST'
+      ? window.open('about:blank', 'mercadopago_test_checkout')
+      : null
+
+    if (mpWindow) {
+      mpWindow.document.title = 'Abriendo Mercado Pago...'
+      mpWindow.document.body.innerHTML = '<p style="font-family:sans-serif;padding:24px">Abriendo Mercado Pago de prueba...</p>'
     }
 
     setLoading(true)
@@ -89,7 +97,22 @@ export default function Checkout() {
       const order = orderRes.data
 
       // 2. Procesar el pago
-      if (paymentMethod === 'MERCADOPAGO') {
+      if (selectedPaymentMethod === 'MERCADOPAGO_TEST') {
+        const { data: prefRes } = await api.post('/api/v1/payments/mercadopago/test-preference', {
+          orderId: order.id,
+        })
+        clearCart()
+        if (mpWindow) {
+          mpWindow.location.href = prefRes.data.initPoint
+        } else {
+          window.location.href = prefRes.data.initPoint
+        }
+        toast.success('Mercado Pago se abrió en una pestaña nueva')
+        navigate(`/orders/${order.id}`)
+        return
+      }
+
+      if (selectedPaymentMethod === 'MERCADOPAGO') {
         // Mercado Pago: crear preferencia y redirigir al checkout de MP.
         // El pedido ya existe en BD, así que es seguro vaciar el carrito
         // y dejar que el usuario complete el pago en el sitio de MP.
@@ -102,7 +125,7 @@ export default function Checkout() {
       }
 
       // Yape / Efectivo al recibir: flujo simulado actual
-      await api.post('/api/v1/payments/charge', { orderId: order.id, method: paymentMethod })
+      await api.post('/api/v1/payments/charge', { orderId: order.id, method: selectedPaymentMethod })
 
       // 3. Limpiar carrito y redirigir
       clearCart()
@@ -110,12 +133,17 @@ export default function Checkout() {
       navigate(`/orders/${order.id}`)
 
     } catch (error) {
+      if (mpWindow && !mpWindow.closed) mpWindow.close()
       const msg = error.response?.data?.message || 'Error al procesar el pedido'
       toast.error(msg)
     } finally {
       setLoading(false)
     }
   }
+
+
+  const handleSubmit = () => processCheckout(paymentMethod)
+  const handleMercadoPagoTest = () => processCheckout('MERCADOPAGO_TEST')
 
   return (
     <div className="checkout">
@@ -176,7 +204,6 @@ export default function Checkout() {
                 value={paymentMethod}
                 onChange={setPaymentMethod}
                 orderType={orderType}
-                mpAvailable={mpAvailable}
               />
             </section>
 
@@ -205,6 +232,7 @@ export default function Checkout() {
               orderType={orderType}
               paymentMethod={paymentMethod}
               onConfirm={handleSubmit}
+              onMercadoPagoTest={handleMercadoPagoTest}
               loading={loading}
             />
           </div>

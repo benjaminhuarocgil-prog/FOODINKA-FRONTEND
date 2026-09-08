@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
-import toast from 'react-hot-toast'
 import {
   User, Store, Bike, Pencil, Check, X,
   Plus, Trash2, Eye, EyeOff, ChefHat,
-  Loader2, ShoppingBag, CreditCard,
+  Loader2, ShoppingBag,
 } from 'lucide-react'
 import Navbar from '../components/layout/Navbar.jsx'
 import LogoUploader from '../components/ui/LogoUploader.jsx'
@@ -15,7 +13,6 @@ import {
   useRestaurantProducts, useCreateProduct,
   useUpdateProduct, useDeleteProduct, useToggleProduct,
   useUpdateDriverVehicle,
-  useConnectMercadoPago, useDisconnectMercadoPago,
 } from '../hooks/useProfile.js'
 import './Profile.css'
 
@@ -172,8 +169,6 @@ function SectionUser({ user }) {
 // ─── Sección restaurante (con logo uploader) ───────────────────────
 function SectionRestaurant({ restaurant }) {
   const { mutateAsync: update, isPending } = useUpdateRestaurant(restaurant.id)
-  const connectMp    = useConnectMercadoPago()
-  const disconnectMp = useDisconnectMercadoPago()
 
   const handleLogoUploaded = async (logoUrl) => {
     await update({ logoUrl })
@@ -187,38 +182,6 @@ function SectionRestaurant({ restaurant }) {
         {restaurant.status === 'ACTIVE'    ? '✅ Activo — visible para los clientes' :
          restaurant.status === 'PENDING_VERIFICATION' ? '⏳ Pendiente de verificación por Foodinka' :
          restaurant.status === 'SUSPENDED' ? '🚫 Suspendido' : restaurant.status}
-      </div>
-
-      {/* Mercado Pago */}
-      <div className="pf-mp-card">
-        <div className="pf-mp-card-info">
-          <CreditCard size={18} />
-          <div>
-            <p className="pf-mp-card-title">Cobros con Mercado Pago</p>
-            <p className="pf-mp-card-sub">
-              {restaurant.mpConnected
-                ? 'Conectado — tus clientes ya pueden pagar con tarjeta.'
-                : 'Conecta tu cuenta para empezar a aceptar pagos con tarjeta.'}
-            </p>
-          </div>
-        </div>
-        {restaurant.mpConnected ? (
-          <button
-            className="pf-mp-btn pf-mp-btn--disconnect"
-            onClick={() => disconnectMp.mutate()}
-            disabled={disconnectMp.isPending}
-          >
-            {disconnectMp.isPending ? <Loader2 size={14} className="pf-spin"/> : 'Desconectar'}
-          </button>
-        ) : (
-          <button
-            className="pf-mp-btn pf-mp-btn--connect"
-            onClick={() => connectMp.mutate()}
-            disabled={connectMp.isPending}
-          >
-            {connectMp.isPending ? <Loader2 size={14} className="pf-spin"/> : 'Conectar'}
-          </button>
-        )}
       </div>
 
       {/* Logo */}
@@ -393,19 +356,6 @@ function SectionDriver({ driver }) {
 export default function Profile() {
   const { isAuthenticated, loginWithRedirect, user: auth0User } = useAuth0()
   const { data: user, isLoading } = useCurrentUser()
-  const [searchParams, setSearchParams] = useSearchParams()
-
-  // El backend redirige acá después del callback de OAuth de Mercado Pago
-  useEffect(() => {
-    if (searchParams.get('mpConnected') === 'true') {
-      toast.success('¡Mercado Pago conectado! Ya puedes recibir pagos con tarjeta. 🎉')
-      setSearchParams({}, { replace: true })
-    } else if (searchParams.get('mpError')) {
-      toast.error(searchParams.get('mpError'))
-      setSearchParams({}, { replace: true })
-    }
-  }, [searchParams])
-
   const role              = user?.role
   const isRestaurantOwner = role === 'RESTAURANT_OWNER'
   const isDriver          = role === 'DELIVERY'

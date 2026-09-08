@@ -124,6 +124,19 @@
   cursor: not-allowed;
 }
 
+.osummary-btn--mercadopago {
+  margin-top: 10px;
+  background: #009ee3;
+}
+.osummary-btn--mercadopago:hover:not(:disabled) { background: #008ac5; }
+
+.osummary-test-note {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

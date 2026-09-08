@@ -15,7 +15,7 @@ const TYPE_LABELS = {
 export default function OrderSummary({
   items, restaurantName, subtotal,
   orderType, paymentMethod,
-  onConfirm, loading,
+  onConfirm, onMercadoPagoTest, loading,
 }) {
   return (
     <div className="osummary">
@@ -88,6 +88,20 @@ export default function OrderSummary({
             : '📅 Confirmar reserva'
         }
       </button>
+
+      <button
+        className="osummary-btn osummary-btn--mercadopago"
+        onClick={onMercadoPagoTest}
+        disabled={loading}
+      >
+        {loading
+          ? <><Loader2 size={18} className="osummary-spinner" /> Procesando...</>
+          : '💳 Pagar con Mercado Pago (prueba)'
+        }
+      </button>
+      <p className="osummary-test-note">
+        Sandbox: no se realizará ningún cobro real.
+      </p>
     </div>
   )
 }

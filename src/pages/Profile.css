@@ -274,35 +274,3 @@
   .pf-modal-body { padding: 14px 16px; }
 }
 
-.pf-mp-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin-bottom: 16px;
-}
-.pf-mp-card-info { display: flex; align-items: center; gap: 12px; color: #334155; }
-.pf-mp-card-title { font-size: 0.875rem; font-weight: 700; margin: 0; color: #0f172a; }
-.pf-mp-card-sub   { font-size: 0.8rem; color: #64748b; margin: 2px 0 0; }
-
-.pf-mp-btn {
-  flex-shrink: 0;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.pf-mp-btn--connect    { background: #009ee3; color: #fff; }
-.pf-mp-btn--connect:hover    { background: #0086c3; }
-.pf-mp-btn--disconnect { background: #fff; color: #dc2626; border: 1px solid #fecaca; }
-.pf-mp-btn--disconnect:hover { background: #fef2f2; }
-.pf-mp-btn:disabled { opacity: 0.6; cursor: default; }
