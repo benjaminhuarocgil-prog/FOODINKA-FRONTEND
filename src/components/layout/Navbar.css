@@ -255,3 +255,12 @@
 
 @media(max-width:1000px){.navbar-inner{padding-inline:18px;gap:12px}.navbar-location{display:none}.navbar-search{max-width:none}.navbar-orders,.navbar-cart-label{display:none}}
 @media(max-width:720px){.navbar-search{display:none}.navbar-actions{display:none}.navbar-hamburger{display:flex;margin-left:auto}.navbar-inner{height:66px}.navbar-logo-img{width:128px;height:50px}}
+
+/* Prioriza siempre autenticación/perfil cuando el ancho disponible disminuye. */
+.navbar-logo{flex:0 1 170px;min-width:105px;overflow:hidden}
+.navbar-logo-img{max-width:100%}
+.navbar-actions{flex-shrink:0}
+.navbar-search{min-width:0;flex:1 1 260px}
+@media(max-width:1180px){.navbar-location{display:none}.navbar-orders,.navbar-cart-label{display:none}}
+@media(max-width:900px){.navbar-inner{padding-inline:18px;gap:12px}.navbar-search{display:none}}
+@media(max-width:720px){.navbar-actions{display:none}.navbar-hamburger{display:flex;margin-left:auto}}
