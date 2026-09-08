@@ -1,5 +1,5 @@
 // src/components/layout/Navbar.jsx
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import {
@@ -49,9 +49,36 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
     })
   }
 
+  useEffect(() => {
+    if (!menuOpen) return undefined
+
+    const closeOnEscape = event => event.key === 'Escape' && setMenuOpen(false)
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', closeOnEscape)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [menuOpen])
+
   return (
     <nav className="navbar">
       <div className="navbar-inner">
+
+        {isConsumer && (
+          <button
+            type="button"
+            className="navbar-consumer-menu"
+            onClick={() => setMenuOpen(open => !open)}
+            aria-label={menuOpen ? 'Cerrar menú de usuario' : 'Abrir menú de usuario'}
+            aria-expanded={menuOpen}
+            aria-controls="consumer-menu"
+          >
+            <Menu size={23} />
+          </button>
+        )}
 
         {/* Logo imagen */}
         <Link to="/" className="navbar-logo">
@@ -138,13 +165,13 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
         </div>
 
         {/* Hamburguesa mobile */}
-        {isConsumer && (
+        {!isAuthenticated && (
           <button
-            className={`navbar-hamburger ${isConsumer ? 'navbar-hamburger--consumer' : ''}`}
+            className="navbar-hamburger"
             onClick={() => setMenuOpen(m => !m)}
             aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú de usuario'}
           >
-            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+            {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         )}
       </div>
@@ -152,7 +179,7 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
       {/* Menú mobile */}
       {menuOpen && (
         <div className="navbar-drawer-overlay" onClick={() => setMenuOpen(false)}>
-          <aside className="navbar-mobile" onClick={event => event.stopPropagation()}>
+          <aside id="consumer-menu" className="navbar-mobile" onClick={event => event.stopPropagation()}>
           <div className="navbar-drawer-head">
             <div>
               <small>{isAuthenticated ? 'Mi cuenta' : 'Menú'}</small>
