@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { useApi } from './useApi.js'
 
 export function useOnboarding() {
@@ -9,6 +10,7 @@ export function useOnboarding() {
   const api      = useApi()
   const navigate = useNavigate()
   const location = useLocation()
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     if (isLoading || !isAuthenticated || synced) return
@@ -17,9 +19,12 @@ export function useOnboarding() {
     const sync = async () => {
       try {
         const { data } = await api.post('/api/v1/auth/sync')
+        await queryClient.invalidateQueries({ queryKey: ['current-user'] })
         // Solo redirigir al onboarding si es usuario NUEVO
         if (data.message === 'Usuario creado') {
-          navigate('/onboarding')
+          const target = sessionStorage.getItem('foodinka_registration_target')
+          sessionStorage.removeItem('foodinka_registration_target')
+          navigate(target || '/onboarding')
         }
       } catch (err) {
         // 409 = usuario ya existe → no es error, continuar normalmente
@@ -32,7 +37,7 @@ export function useOnboarding() {
     }
 
     sync()
-  }, [isAuthenticated, isLoading, synced, location.pathname])
+  }, [api, isAuthenticated, isLoading, location.pathname, navigate, queryClient, synced])
 
   return { synced }
 }

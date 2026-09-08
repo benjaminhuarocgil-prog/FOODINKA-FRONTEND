@@ -33,7 +33,7 @@ const DISTRICTS = [
 ]
 
 // ── Pantalla de éxito ──────────────────────────────────────────
-function SuccessScreen({ restaurantName, onGoHome }) {
+function SuccessScreen({ restaurantName, onOpenDashboard }) {
   return (
     <div className="rr-success">
       <div className="rr-success-icon">🎉</div>
@@ -51,8 +51,8 @@ function SuccessScreen({ restaurantName, onGoHome }) {
         <div className="rr-step"><span className="rr-step-dot"/>Revisión del equipo Foodinka</div>
         <div className="rr-step"><span className="rr-step-dot"/>Activación y apertura</div>
       </div>
-      <button className="rr-btn-primary" onClick={onGoHome}>
-        Ir al inicio
+      <button className="rr-btn-primary" onClick={onOpenDashboard}>
+        Abrir mi panel
       </button>
     </div>
   )
@@ -147,7 +147,7 @@ export default function RegisterRestaurant() {
       <div className="rr">
         <Navbar />
         <div className="rr-inner">
-          <SuccessScreen restaurantName={form.name} onGoHome={() => navigate('/')} />
+          <SuccessScreen restaurantName={form.name} onOpenDashboard={() => navigate('/restaurant-dashboard')} />
         </div>
       </div>
     )

@@ -157,6 +157,23 @@ export function useToggleProduct(restaurantId) {
   })
 }
 
+export function useApplyProductDiscount(restaurantId) {
+  const { getAccessTokenSilently } = useAuth0()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ productId, discountPct }) => {
+      await withAuth(getAccessTokenSilently)
+      const res = await api.patch(`/api/v1/products/${productId}/discount`, { discountPct })
+      return res.data
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['restaurant-products', restaurantId] })
+      qc.invalidateQueries({ queryKey: ['restaurant', restaurantId] })
+    },
+    onError: (err) => toast.error(err?.response?.data?.message || 'No se pudo aplicar la promoción'),
+  })
+}
+
 // ── Actualizar vehículo del repartidor ─────────────────────────
 export function useUpdateDriverVehicle() {
   const { getAccessTokenSilently } = useAuth0()

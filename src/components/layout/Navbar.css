@@ -82,6 +82,32 @@
   transition: background 0.15s;
 }
 .navbar-btn-login:hover { background: #cf4f1f; }
+.navbar-auth-actions { display: flex; align-items: center; gap: 8px; }
+.navbar-btn-register {
+  padding: 8px 15px; border: 1px solid #e85d24; border-radius: 8px;
+  background: #fff; color: #d9501d; font-size: .875rem; font-weight: 650; cursor: pointer;
+}
+.navbar-btn-register:hover { background: #fff7f4; }
+
+.register-choice-overlay {
+  position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center;
+  padding: 20px; background: rgba(17, 24, 39, .58); backdrop-filter: blur(5px);
+}
+.register-choice-modal {
+  position: relative; width: min(100%, 550px); padding: 30px;
+  border-radius: 22px; background: #fff; box-shadow: 0 28px 75px rgba(15, 23, 42, .28);
+}
+.register-choice-close { position: absolute; top: 16px; right: 16px; display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 9px; background: #f3f4f6; color: #64748b; cursor: pointer; }
+.register-choice-kicker { color: #e85d24; font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.register-choice-modal h2 { margin: 7px 0 7px; color: #172033; font-size: 1.55rem; letter-spacing: -.03em; }
+.register-choice-modal > p { margin: 0 0 22px; color: #758094; font-size: .88rem; }
+.register-choice-grid { display: grid; gap: 10px; }
+.register-choice-grid button { display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; align-items: center; gap: 13px; padding: 14px; border: 1px solid #e9ebef; border-radius: 14px; background: #fff; color: #354052; text-align: left; cursor: pointer; transition: .18s ease; }
+.register-choice-grid button:hover { border-color: #f3b89e; background: #fff9f6; transform: translateY(-1px); box-shadow: 0 9px 22px rgba(232, 93, 36, .09); }
+.register-choice-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 13px; background: #fff0e9; color: #e85d24; }
+.register-choice-grid button > span:nth-child(2) { display: grid; gap: 3px; }
+.register-choice-grid strong { color: #202736; font-size: .92rem; }
+.register-choice-grid small { color: #8992a2; font-size: .76rem; }
 
 /* Avatar */
 .navbar-profile { position: relative; }

@@ -12,6 +12,7 @@ import DriverDashboard     from './pages/DriverDashboard.jsx'
 import MyOrders            from './pages/MyOrders.jsx'
 import OrderDetail         from './pages/OrderDetail.jsx'
 import RestaurantDashboard from './pages/RestaurantDashboard.jsx'
+import RestaurantPortal    from './pages/RestaurantPortal.jsx'
 import RegisterRestaurant  from './pages/RegisterRestaurant.jsx'
 import Profile from './pages/Profile.jsx'
 import PaymentResult from './pages/PaymentResult.jsx'
@@ -31,7 +32,8 @@ function AppRoutes() {
       <Route path="/driver"                element={<DriverDashboard />} />
       <Route path="/orders"                element={<MyOrders />} />
       <Route path="/orders/:id"            element={<OrderDetail />} />
-      <Route path="/restaurant-dashboard"  element={<RestaurantDashboard />} />
+      <Route path="/restaurant-dashboard"  element={<RestaurantPortal />} />
+      <Route path="/restaurant-orders"     element={<RestaurantDashboard />} />
       <Route path="/register-restaurant"   element={<RegisterRestaurant />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/payment/success" element={<PaymentResult status="success" />} />

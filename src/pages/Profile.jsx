@@ -274,7 +274,7 @@ function SectionRestaurant({ restaurant }) {
 }
 
 // ─── Sección menú ──────────────────────────────────────────────────
-function SectionMenu({ restaurant }) {
+export function SectionMenu({ restaurant }) {
   const { data: products = [], isLoading } = useRestaurantProducts(restaurant.id)
   const deleteProduct = useDeleteProduct(restaurant.id)
   const toggleProduct = useToggleProduct(restaurant.id)
