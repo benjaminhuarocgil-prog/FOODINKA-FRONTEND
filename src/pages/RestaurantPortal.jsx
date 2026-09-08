@@ -4,13 +4,13 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import {
   BarChart3, BookOpen, ChevronRight, ClipboardList, FileText,
-  LogOut, Menu as MenuIcon, Percent, ReceiptText, Search,
+  House, LogOut, Menu as MenuIcon, Percent, ReceiptText, Search, Settings,
   ShoppingBag, Star, Store, TrendingUp, Users, X,
 } from 'lucide-react'
 import { useCurrentUser } from '../hooks/useCurrentUser.js'
 import { useRestaurantOrders } from '../hooks/useRestaurantOrders.js'
 import { useApplyProductDiscount, useRestaurantProducts } from '../hooks/useProfile.js'
-import { SectionMenu } from './Profile.jsx'
+import { SectionMenu, SectionRestaurant } from './Profile.jsx'
 import './Profile.css'
 import './RestaurantPortal.css'
 
@@ -20,6 +20,7 @@ const SECTIONS = [
   { id: 'ventas', label: 'Datos de venta', icon: ClipboardList },
   { id: 'promociones', label: 'Promociones', icon: Percent },
   { id: 'facturacion', label: 'Facturación', icon: ReceiptText },
+  { id: 'configuracion', label: 'Configuración', icon: Settings },
 ]
 
 const money = value => `S/ ${Number(value || 0).toFixed(2)}`
@@ -191,10 +192,11 @@ export default function RestaurantPortal() {
       <nav>{SECTIONS.map(item => { const Icon = item.icon; return <button key={item.id} className={section === item.id ? 'active' : ''} onClick={() => setSection(item.id)}><Icon size={18}/><span>{item.label}</span><ChevronRight size={15}/></button> })}</nav>
       <button className="rp-orders-link" onClick={() => navigate('/restaurant-orders')}><ShoppingBag size={18}/> Gestionar pedidos</button>
       <button className="rp-logout" onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}><LogOut size={17}/> Cerrar sesión</button>
+      <button className="rp-home" onClick={() => navigate('/')}><House size={17}/> Volver a la tienda</button>
     </aside>
-    <main className="rp-main"><header className="rp-topbar"><div><small>Panel del restaurante</small><strong>{SECTIONS.find(item => item.id === section)?.label}</strong></div><button onClick={() => navigate('/profile')}>{(user.name || 'R')[0]}<span>{user.name}</span></button></header>
+    <main className="rp-main"><header className="rp-topbar"><div><small>Panel del restaurante</small><strong>{SECTIONS.find(item => item.id === section)?.label}</strong></div></header>
       <div className="rp-content">{ordersLoading && section !== 'menu' && section !== 'promociones' ? <div className="rp-loading">Preparando tus datos…</div> : <>
-        {section === 'dashboard' && <Overview orders={orders} restaurant={restaurant}/>} {section === 'menu' && <SectionMenu restaurant={restaurant}/>} {section === 'ventas' && <Sales orders={orders}/>} {section === 'promociones' && <Promotions restaurantId={restaurant.id} orders={orders}/>} {section === 'facturacion' && <Billing orders={orders} restaurant={restaurant}/>} </>}
+        {section === 'dashboard' && <Overview orders={orders} restaurant={restaurant}/>} {section === 'menu' && <SectionMenu restaurant={restaurant}/>} {section === 'ventas' && <Sales orders={orders}/>} {section === 'promociones' && <Promotions restaurantId={restaurant.id} orders={orders}/>} {section === 'facturacion' && <Billing orders={orders} restaurant={restaurant}/>} {section === 'configuracion' && <SectionRestaurant restaurant={restaurant}/>} </>}
       </div>
     </main>
   </div>

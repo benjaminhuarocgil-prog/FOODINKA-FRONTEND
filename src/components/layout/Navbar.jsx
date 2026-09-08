@@ -24,7 +24,6 @@ export default function Navbar({ cartCount }) {
   const isAdmin           = role === 'ADMIN'
   const isDriver          = role === 'DELIVERY'
   const isRestaurantOwner = role === 'RESTAURANT_OWNER'
-  const isConsumer        = role === 'CONSUMER' || !role
 
   const handleLogout = () => {
     setProfileOpen(false)
@@ -104,12 +103,6 @@ export default function Navbar({ cartCount }) {
                     </button>
                   )}
 
-                  {isConsumer && !isRestaurantOwner && !isDriver && (
-                    <button onClick={() => go('/register-restaurant')}>
-                      <Store size={15} /> Inscribir mi restaurante
-                    </button>
-                  )}
-
                   <div className="navbar-dropdown-divider" />
 
                   {isDriver && (
@@ -117,12 +110,6 @@ export default function Navbar({ cartCount }) {
                       <Bike size={15} /> Panel repartidor
                     </button>
                   )}
-                  {isConsumer && !isRestaurantOwner && (
-                    <button onClick={() => go('/become-driver')}>
-                      <Bike size={15} /> Ser repartidor
-                    </button>
-                  )}
-
                   {isAdmin && (
                     <button onClick={() => go('/admin')}>
                       <LayoutDashboard size={15} /> Dashboard admin
@@ -165,16 +152,8 @@ export default function Navbar({ cartCount }) {
                     Panel del restaurante
                   </Link>
                 )}
-                {isConsumer && !isRestaurantOwner && !isDriver && (
-                  <Link to="/register-restaurant" onClick={() => setMenuOpen(false)}>
-                    Inscribir mi restaurante
-                  </Link>
-                )}
                 {isDriver && (
                   <Link to="/driver" onClick={() => setMenuOpen(false)}>Panel repartidor</Link>
-                )}
-                {isConsumer && !isRestaurantOwner && (
-                  <Link to="/become-driver" onClick={() => setMenuOpen(false)}>Ser repartidor</Link>
                 )}
                 {isAdmin && (
                   <Link to="/admin" onClick={() => setMenuOpen(false)}>Dashboard admin</Link>

@@ -2,3 +2,12 @@
 @media(max-width:1000px){.rp-metrics{grid-template-columns:repeat(2,1fr)}.rp-promo-config{grid-template-columns:1fr}.rp-product-select{grid-template-columns:1fr}}
 @media(max-width:760px){.rp{grid-template-columns:1fr}.rp-sidebar{position:static;height:auto}.rp-sidebar nav{grid-template-columns:repeat(2,1fr)}.rp-logout{margin-top:0}.rp-topbar{padding:0 18px}.rp-content{padding:18px}.rp-welcome{align-items:flex-start;gap:20px;flex-direction:column}.rp-sales-list article{grid-template-columns:1fr}.rp-toolbar{flex-direction:column}.rp-toolbar label{flex:none}.rp-product-select{grid-template-columns:1fr}}
 @media(max-width:480px){.rp-sidebar nav{grid-template-columns:1fr}.rp-metrics{grid-template-columns:1fr}.rp-topbar>button span{display:none}.rp-content{padding:12px}.rp-panel{padding:17px}}
+
+/* El panel ocupa toda la ventana aunque el sitio público use un contenedor centrado. */
+.rp{width:100vw;max-width:none;margin-left:calc(50% - 50vw);grid-template-columns:250px minmax(0,1fr);text-align:left}
+.rp-sidebar{box-sizing:border-box}
+.rp-home{width:100%;border:1px solid #ffffff14;color:#c8cfda;background:transparent;border-radius:11px;padding:12px;display:flex;align-items:center;gap:11px;text-align:left;cursor:pointer;transition:.2s}
+.rp-home:hover{background:#ffffff0c;color:#fff}
+.rp-topbar{justify-content:flex-start}
+
+@media(max-width:760px){.rp{grid-template-columns:1fr}.rp-home{justify-content:center}}

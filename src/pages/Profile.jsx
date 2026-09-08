@@ -222,7 +222,7 @@ function SectionUser({ user }) {
 }
 
 // ─── Sección restaurante (con logo uploader) ───────────────────────
-function SectionRestaurant({ restaurant }) {
+export function SectionRestaurant({ restaurant }) {
   const { mutateAsync: update, isPending } = useUpdateRestaurant(restaurant.id)
 
   const handleLogoUploaded = async (logoUrl) => {
