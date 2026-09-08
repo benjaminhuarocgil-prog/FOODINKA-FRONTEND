@@ -51,6 +51,7 @@ body {
   margin: 0;
   min-width: 320px;
   background: var(--background);
+  overflow-x: hidden;
 }
 
 #root {

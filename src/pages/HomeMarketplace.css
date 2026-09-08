@@ -17,3 +17,9 @@
 @media(max-width:1100px){.home-container{width:calc(100% - 44px)}}
 @media(max-width:640px){.home-container{width:calc(100% - 32px)}}
 @media(max-width:520px){.home-hero-copy h1{font-size:2.05rem}.home-hero-copy>p{font-size:.86rem}.home-hero-side-photo{right:-18px}.home-hero-note{left:8px}}
+
+/* Layout fluido: conserva márgenes cómodos sin limitar monitores grandes. */
+.home-container{width:calc(100% - clamp(32px,6vw,96px));max-width:none}
+.home-brand-banner a{position:relative;color:#d9501d !important;background:#fff !important;visibility:visible;opacity:1}
+.home-brand-banner a svg{display:block;stroke:currentColor}
+@media(max-width:640px){.home-container{width:calc(100% - 32px)}}
