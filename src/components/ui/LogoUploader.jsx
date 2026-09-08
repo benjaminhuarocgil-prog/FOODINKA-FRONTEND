@@ -17,7 +17,7 @@ async function uploadToSupabase(file, restaurantId) {
     {
       method:  'POST',
       headers: {
-        'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'apikey':        SUPABASE_ANON,
         'Content-Type':  file.type,
         'x-upsert':      'true',   // sobreescribe si ya existe mismo nombre
       },
