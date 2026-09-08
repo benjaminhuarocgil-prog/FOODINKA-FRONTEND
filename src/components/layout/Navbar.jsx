@@ -24,6 +24,7 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
   const isAdmin           = role === 'ADMIN'
   const isDriver          = role === 'DELIVERY'
   const isRestaurantOwner = role === 'RESTAURANT_OWNER'
+  const isConsumer        = role === 'CONSUMER'
 
   const handleLogout = () => {
     setProfileOpen(false)
@@ -81,7 +82,7 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
             </div>
           )}
 
-          {isAuthenticated && (
+          {isAuthenticated && !isConsumer && (
             <div className="navbar-profile">
               <button className="navbar-avatar" onClick={() => setProfileOpen(p => !p)}>
                 {user?.picture
@@ -135,18 +136,32 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
         </div>
 
         {/* Hamburguesa mobile */}
-        <button className="navbar-hamburger" onClick={() => setMenuOpen(m => !m)}>
-          {menuOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        {(!isAuthenticated || isConsumer) && (
+          <button
+            className={`navbar-hamburger ${isConsumer ? 'navbar-hamburger--consumer' : ''}`}
+            onClick={() => setMenuOpen(m => !m)}
+            aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú de usuario'}
+          >
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        )}
       </div>
 
       {/* Menú mobile */}
       {menuOpen && (
-        <div className="navbar-mobile">
-          <Link to="/"     onClick={() => setMenuOpen(false)}>Inicio</Link>
-          <Link to="/cart" onClick={() => setMenuOpen(false)}>
-            Carrito {count > 0 && `(${count})`}
-          </Link>
+        <div className="navbar-drawer-overlay" onClick={() => setMenuOpen(false)}>
+          <aside className="navbar-mobile" onClick={event => event.stopPropagation()}>
+          <div className="navbar-drawer-head">
+            <div>
+              <small>{isAuthenticated ? 'Mi cuenta' : 'Menú'}</small>
+              <strong>{isAuthenticated ? (user?.name || 'Usuario') : 'Antójia'}</strong>
+              {isAuthenticated && <span>{user?.email}</span>}
+            </div>
+            <button onClick={() => setMenuOpen(false)} aria-label="Cerrar"><X size={19}/></button>
+          </div>
+          <nav className="navbar-drawer-links">
+          <Link to="/" onClick={() => setMenuOpen(false)}>Inicio</Link>
+          <Link to="/cart" onClick={() => setMenuOpen(false)}>Carrito {count > 0 && `(${count})`}</Link>
           {!isAuthenticated
             ? <>
                 <button onClick={() => { setMenuOpen(false); setRegisterOpen(true) }}>Registrarse</button>
@@ -154,7 +169,7 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
               </>
             : <>
                 <Link to="/profile" onClick={() => setMenuOpen(false)}>Mi perfil</Link>
-                <Link to="/orders"  onClick={() => setMenuOpen(false)}>Mis pedidos</Link>
+                <Link to="/orders" onClick={() => setMenuOpen(false)}>Mis pedidos y seguimiento</Link>
                 {isRestaurantOwner && (
                   <Link to="/restaurant-dashboard" onClick={() => setMenuOpen(false)}>
                     Panel del restaurante
@@ -166,9 +181,11 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
                 {isAdmin && (
                   <Link to="/admin" onClick={() => setMenuOpen(false)}>Dashboard admin</Link>
                 )}
-                <button onClick={handleLogout}>Cerrar sesión</button>
+                <button className="navbar-drawer-logout" onClick={handleLogout}><LogOut size={16}/> Cerrar sesión</button>
               </>
           }
+          </nav>
+          </aside>
         </div>
       )}
 
