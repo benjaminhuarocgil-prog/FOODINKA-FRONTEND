@@ -100,6 +100,7 @@ function OrderCard({ order, onAction, isUpdating }) {
             <p className="rdb-detail-label"><User size={13}/> Cliente</p>
             <p className="rdb-detail-val">{order.user?.name || '—'}</p>
             {order.user?.phone && <p className="rdb-detail-sub"><Phone size={11}/> {order.user.phone}</p>}
+            <p className="rdb-detail-sub">{order.user?.consumerProfile?.totalOrders ?? 0} pedidos realizados en total</p>
           </div>
 
           {/* Dirección / Reserva */}
@@ -172,6 +173,15 @@ function OrderCard({ order, onAction, isUpdating }) {
                 height={260}
               />
             </>
+          )}
+
+          {order.deliveryProofUrl && (
+            <div className="rdb-detail-section">
+              <p className="rdb-detail-label">Comprobante de entrega</p>
+              <a href={order.deliveryProofUrl} target="_blank" rel="noreferrer">
+                <img className="rdb-proof-image" src={order.deliveryProofUrl} alt="Fotografía de la entrega"/>
+              </a>
+            </div>
           )}
 
           {/* Acciones */}

@@ -198,6 +198,23 @@ export default function OrderDetail() {
           </div>
         )}
 
+        {order.type === 'DELIVERY' && order.deliveryCode && !['DELIVERED', 'CANCELLED'].includes(order.status) && (
+          <div className="odetail-card odetail-delivery-code">
+            <h2 className="odetail-card-title">Código secreto de entrega</h2>
+            <strong>{order.deliveryCode}</strong>
+            <p>Dáselo al repartidor únicamente cuando tengas tu pedido en las manos.</p>
+          </div>
+        )}
+
+        {order.deliveryProofUrl && (
+          <div className="odetail-card">
+            <h2 className="odetail-card-title">Comprobante de entrega</h2>
+            <a href={order.deliveryProofUrl} target="_blank" rel="noreferrer">
+              <img className="odetail-proof-image" src={order.deliveryProofUrl} alt="Fotografía de la entrega"/>
+            </a>
+          </div>
+        )}
+
         {order.type === 'DELIVERY' && order.driver && (
           <div className="odetail-card">
             <h2 className="odetail-card-title"><MapPin size={16} /> Seguimiento en vivo</h2>

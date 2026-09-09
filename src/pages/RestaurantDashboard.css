@@ -415,3 +415,4 @@
   .rdb-actions { flex-direction: column; }
   .rdb-action-btn { width: 100%; text-align: center; }
 }
+.rdb-proof-image{display:block;width:100%;max-height:360px;object-fit:cover;border-radius:12px;margin-top:8px}

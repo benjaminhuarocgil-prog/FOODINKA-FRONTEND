@@ -189,3 +189,4 @@
   .odetail-totals { width: auto; }
   .odetail-check-payment-btn { width: 100%; }
 }
+.odetail-delivery-code{text-align:center;border-color:#fed7aa;background:#fffaf5}.odetail-delivery-code strong{display:block;font-size:2rem;letter-spacing:.28em;color:#c2410c}.odetail-delivery-code p{margin:8px 0 0;color:#667085;font-size:.85rem}.odetail-proof-image{display:block;width:100%;max-height:420px;object-fit:cover;border-radius:14px}
