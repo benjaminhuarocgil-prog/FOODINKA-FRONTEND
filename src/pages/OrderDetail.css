@@ -139,6 +139,8 @@
 .odetail-total-row--total { margin-top: 8px; padding-top: 13px; border-top: 1px dashed #edbda7; color: #1e2533; font-size: 1.08rem; font-weight: 850; }
 .odetail-total-row--total span:last-child { color: #df541e; }
 .odetail-notes { margin: 0; padding: 15px 17px; border-left: 3px solid #e85d24; border-radius: 0 12px 12px 0; background: #fff8f4; color: #596477; font-size: .88rem; line-height: 1.65; }
+.odetail-tracking-id { margin: -4px 0 14px; color: #667085; font-size: .8rem; overflow-wrap: anywhere; }
+.odetail-location-time { margin: 10px 0 0; color: #667085; font-size: .78rem; text-align: right; }
 
 .odetail-check-payment-btn {
   margin-top: 16px;

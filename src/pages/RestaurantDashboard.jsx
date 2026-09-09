@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import Navbar from '../components/layout/Navbar.jsx'
 import OrderStatusBadge from '../components/orders/OrderStatusBadge.jsx'
+import DeliveryTrackingMap from '../components/delivery/DeliveryTrackingMap.jsx'
 import { useCurrentUser } from '../hooks/useCurrentUser.js'
 import { useRestaurantOrders, useUpdateOrderStatus } from '../hooks/useRestaurantOrders.js'
 import './RestaurantDashboard.css'
@@ -159,10 +160,18 @@ function OrderCard({ order, onAction, isUpdating }) {
 
           {/* Repartidor (si tiene) */}
           {order.driver && (
-            <div className="rdb-driver-chip">
-              <Bike size={14}/> Repartidor: <strong>{order.driver.user?.name}</strong>
-              {order.driver.user?.phone && <span> · {order.driver.user.phone}</span>}
-            </div>
+            <>
+              <div className="rdb-driver-chip">
+                <Bike size={14}/> Repartidor: <strong>{order.driver.user?.name}</strong>
+                {order.driver.user?.phone && <span> · {order.driver.user.phone}</span>}
+              </div>
+              <DeliveryTrackingMap
+                restaurant={order.restaurant}
+                destination={{ latitude: order.deliveryLatitude, longitude: order.deliveryLongitude }}
+                driver={{ latitude: order.driver.currentLatitude, longitude: order.driver.currentLongitude, name: order.driver.user?.name }}
+                height={260}
+              />
+            </>
           )}
 
           {/* Acciones */}

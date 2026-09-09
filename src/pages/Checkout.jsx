@@ -28,6 +28,7 @@ export default function Checkout() {
   const [deliveryDistrict, setDeliveryDistrict] = useState('')
   const [deliveryPhone,    setDeliveryPhone]    = useState(user?.phone || '')
   const [deliveryNotes,    setDeliveryNotes]    = useState('')
+  const [deliveryCoords,   setDeliveryCoords]   = useState(null)
 
   // Campos reserva
   const [reservationDate, setReservationDate] = useState('')
@@ -66,6 +67,15 @@ export default function Checkout() {
     setLoading(true)
 
     try {
+      let coords = deliveryCoords
+      if (orderType === 'DELIVERY' && !coords && navigator.geolocation) {
+        coords = await new Promise(resolve => navigator.geolocation.getCurrentPosition(
+          p => resolve({ latitude: p.coords.latitude, longitude: p.coords.longitude }),
+          () => resolve(null),
+          { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 },
+        ))
+        if (coords) setDeliveryCoords(coords)
+      }
       // 1. Crear el pedido
       const orderPayload = {
         restaurantId,
@@ -80,6 +90,8 @@ export default function Checkout() {
           deliveryDistrict,
           deliveryPhone,
           deliveryNotes: deliveryNotes || null,
+          deliveryLatitude: coords?.latitude ?? null,
+          deliveryLongitude: coords?.longitude ?? null,
         }),
         ...(orderType === 'RESERVATION' && {
           reservationDate: new Date(reservationDate).toISOString(),
