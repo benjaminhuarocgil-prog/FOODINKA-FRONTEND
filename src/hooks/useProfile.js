@@ -162,17 +162,23 @@ export function useToggleProduct(restaurantId) {
       ))
       return { previous, queryKey }
     },
-    onSuccess: (response, { id }) => {
+    onSuccess: (response, { id, isAvailable }) => {
       const updated = response?.data
-      if (updated) qc.setQueryData(['restaurant-products', restaurantId], (products = []) => products.map(product => product.id === id ? { ...product, ...updated } : product))
-      toast.success(updated?.isAvailable ? 'Producto visible para consumidores' : 'Producto oculto para consumidores')
+      const confirmedAvailability = typeof updated?.isAvailable === 'boolean'
+        ? updated.isAvailable
+        : isAvailable
+
+      qc.setQueryData(['restaurant-products', restaurantId], (products = []) => products.map(product => product.id === id
+        ? { ...product, ...updated, isAvailable: confirmedAvailability }
+        : product
+      ))
+      toast.success(confirmedAvailability ? 'Producto visible para consumidores' : 'Producto oculto para consumidores')
     },
     onError: (err, _id, context) => {
       if (context?.queryKey) qc.setQueryData(context.queryKey, context.previous)
       toast.error(err?.response?.data?.message || 'No se pudo cambiar la visibilidad')
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: ['restaurant-products', restaurantId] })
       qc.invalidateQueries({ queryKey: ['restaurant', restaurantId] })
       qc.invalidateQueries({ queryKey: ['restaurants'] })
     },
