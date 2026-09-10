@@ -46,7 +46,11 @@ export default function AdminSidebar({ active, onChange, sections }) {
       <div className="sidebar-footer">
         <button
           className="sidebar-logout"
-          onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+          onClick={() => {
+            sessionStorage.removeItem('foodinka_authenticated')
+            sessionStorage.removeItem('foodinka_recovery_attempted')
+            logout({ logoutParams: { returnTo: window.location.origin } })
+          }}
         >
           <LogOut size={16} />
           <span>Cerrar sesión</span>

@@ -30,6 +30,8 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
 
   const handleLogout = () => {
     setProfileOpen(false)
+    sessionStorage.removeItem('foodinka_authenticated')
+    sessionStorage.removeItem('foodinka_recovery_attempted')
     logout({ logoutParams: { returnTo: window.location.origin } })
   }
 

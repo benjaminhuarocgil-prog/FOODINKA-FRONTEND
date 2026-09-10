@@ -207,6 +207,11 @@ export default function RestaurantPortal() {
   const [section, setSection] = useState('dashboard')
   const { data, isLoading: ordersLoading } = useRestaurantOrders(restaurant?.id, { page: 1, limit: 500 })
   const orders = data?.data || []
+  const handleLogout = () => {
+    sessionStorage.removeItem('foodinka_authenticated')
+    sessionStorage.removeItem('foodinka_recovery_attempted')
+    logout({ logoutParams: { returnTo: window.location.origin } })
+  }
 
   if (userLoading) return <div className="rp-loading">Cargando panel del restaurante…</div>
   if (!user || user.role !== 'RESTAURANT_OWNER' || !restaurant) return <div className="rp-access"><Store size={45}/><h1>Panel no disponible</h1><p>Necesitas registrar y tener asociado un restaurante.</p><button onClick={() => navigate('/register-restaurant')}>Registrar restaurante</button></div>
@@ -217,7 +222,7 @@ export default function RestaurantPortal() {
       <div className="rp-restaurant"><strong>{restaurant.name}</strong><small>{restaurant.isApproved ? 'Restaurante aprobado' : 'Pendiente de aprobación'}</small></div>
       <nav>{SECTIONS.map(item => { const Icon = item.icon; return <button key={item.id} className={section === item.id ? 'active' : ''} onClick={() => setSection(item.id)}><Icon size={18}/><span>{item.label}</span><ChevronRight size={15}/></button> })}</nav>
       <button className="rp-orders-link" onClick={() => navigate('/restaurant-orders')}><ShoppingBag size={18}/> Gestionar pedidos</button>
-      <button className="rp-logout" onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}><LogOut size={17}/> Cerrar sesión</button>
+      <button className="rp-logout" onClick={handleLogout}><LogOut size={17}/> Cerrar sesión</button>
       <button className="rp-home" onClick={() => navigate('/')}><House size={17}/> Volver a la tienda</button>
     </aside>
     <main className="rp-main"><header className="rp-topbar"><div><small>Panel del restaurante</small><strong>{SECTIONS.find(item => item.id === section)?.label}</strong></div></header>

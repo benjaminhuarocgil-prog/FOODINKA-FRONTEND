@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
+import { useEffect, useRef } from 'react'
 import { useOnboarding } from './hooks/useOnboarding.js'
 import Home                from './pages/Home.jsx'
 import Callback            from './pages/Callback.jsx'
@@ -45,7 +46,34 @@ function AppRoutes() {
 }
 
 export default function App() {
-  const { isLoading } = useAuth0()
-  if (isLoading) return <div className="app-session-loading" role="status"><span/>Restaurando tu sesión…</div>
+  const { isLoading, isAuthenticated, loginWithRedirect, error } = useAuth0()
+  const recoveryStarted = useRef(false)
+  const sessionExpected = sessionStorage.getItem('foodinka_authenticated') === 'true'
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      sessionStorage.setItem('foodinka_authenticated', 'true')
+      sessionStorage.removeItem('foodinka_recovery_attempted')
+      return
+    }
+    if (error) {
+      sessionStorage.removeItem('foodinka_authenticated')
+      sessionStorage.removeItem('foodinka_recovery_attempted')
+      return
+    }
+    if (!isLoading && sessionExpected && !recoveryStarted.current && sessionStorage.getItem('foodinka_recovery_attempted') !== 'true') {
+      recoveryStarted.current = true
+      sessionStorage.setItem('foodinka_recovery_attempted', 'true')
+      loginWithRedirect({
+        authorizationParams: { prompt: 'none' },
+        appState: { returnTo: window.location.pathname + window.location.search },
+      }).catch(() => {
+        sessionStorage.removeItem('foodinka_authenticated')
+        sessionStorage.removeItem('foodinka_recovery_attempted')
+      })
+    }
+  }, [error, isAuthenticated, isLoading, loginWithRedirect, sessionExpected])
+
+  if (isLoading || (!isAuthenticated && sessionExpected && !error)) return <div className="app-session-loading" role="status"><span/>Restaurando tu sesión…</div>
   return <AppRoutes />
 }
