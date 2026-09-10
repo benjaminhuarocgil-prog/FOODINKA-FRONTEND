@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
+import { useAuth0 } from '@auth0/auth0-react'
 import { useOnboarding } from './hooks/useOnboarding.js'
 import Home                from './pages/Home.jsx'
 import Callback            from './pages/Callback.jsx'
@@ -44,5 +45,7 @@ function AppRoutes() {
 }
 
 export default function App() {
+  const { isLoading } = useAuth0()
+  if (isLoading) return <div className="app-session-loading" role="status"><span/>Restaurando tu sesión…</div>
   return <AppRoutes />
 }

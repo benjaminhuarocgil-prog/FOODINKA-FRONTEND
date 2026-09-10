@@ -312,7 +312,9 @@ export function SectionMenu({ restaurant }) {
               </div>
               <div className="pf-product-actions">
                 <button className={`pf-icon-btn ${product.isAvailable ? 'pf-available' : 'pf-unavailable'}`}
-                  onClick={() => toggleProduct.mutate(product.id)}>
+                  onClick={() => toggleProduct.mutate(product.id)} disabled={toggleProduct.isPending}
+                  title={product.isAvailable ? 'Ocultar para consumidores' : 'Mostrar para consumidores'}
+                  aria-label={product.isAvailable ? 'Ocultar producto para consumidores' : 'Mostrar producto para consumidores'}>
                   {product.isAvailable ? <Eye size={14}/> : <EyeOff size={14}/>}
                 </button>
                 <button className="pf-icon-btn pf-edit" onClick={() => setModal(product)}><Pencil size={14}/></button>

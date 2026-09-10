@@ -111,3 +111,4 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+.app-session-loading{min-height:100vh;display:flex;align-items:center;justify-content:center;gap:11px;background:#f8f9fb;color:#667085;font:600 14px Inter,system-ui,sans-serif}.app-session-loading span{width:20px;height:20px;border:3px solid #fed7c2;border-top-color:#e85d24;border-radius:50%;animation:app-session-spin .8s linear infinite}@keyframes app-session-spin{to{transform:rotate(360deg)}}

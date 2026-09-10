@@ -226,9 +226,9 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
             <h2 id="register-choice-title">¿Cómo quieres registrarte?</h2>
             <p>Escoge el perfil que mejor describe lo que quieres hacer.</p>
             <div className="register-choice-grid">
-              <button onClick={() => registerAs('/onboarding')}>
+              <button onClick={() => registerAs('/')}>
                 <span className="register-choice-icon"><User size={22} /></span>
-                <span><strong>Usuario</strong><small>Pide comida y reserva mesas.</small></span>
+                <span><strong>Consumidor</strong><small>Cliente para pedir comida y reservar mesas.</small></span>
                 <ArrowRight size={17} />
               </button>
               <button onClick={() => registerAs('/register-restaurant')}>
