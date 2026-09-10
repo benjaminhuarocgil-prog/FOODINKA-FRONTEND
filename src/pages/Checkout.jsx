@@ -8,7 +8,7 @@ import Navbar from '../components/layout/Navbar.jsx'
 import OrderTypeSelector from '../components/checkout/OrderTypeSelector.jsx'
 import DeliveryForm from '../components/checkout/DeliveryForm.jsx'
 import ReservationForm from '../components/checkout/ReservationForm.jsx'
-import PaymentMethod from '../components/checkout/PaymentMethod.jsx'
+import RestaurantLocationPicker from '../components/restaurant/RestaurantLocationPicker.jsx'
 import OrderSummary from '../components/checkout/OrderSummary.jsx'
 import './Checkout.css'
 
@@ -19,7 +19,6 @@ export default function Checkout() {
   const { items, restaurantId, restaurantName, getSubtotal, getTotalItems, clearCart } = useCartStore()
 
   const [orderType,    setOrderType]    = useState('DELIVERY')  // 'DELIVERY' | 'RESERVATION'
-  const [paymentMethod, setPaymentMethod] = useState('CASH_ON_DELIVERY') // 'MERCADOPAGO' | 'YAPE' | 'CASH_ON_DELIVERY'
   const [loading,      setLoading]      = useState(false)
   const [notes,        setNotes]        = useState('')
 
@@ -50,6 +49,7 @@ export default function Checkout() {
       if (!deliveryAddress.trim()) return toast.error('Ingresa la dirección de entrega')
       if (!deliveryDistrict.trim()) return toast.error('Ingresa el distrito')
       if (!deliveryPhone.trim()) return toast.error('Ingresa un teléfono de contacto')
+      if (deliveryCoords?.latitude == null || deliveryCoords?.longitude == null) return toast.error('Marca en el mapa la ubicación exacta donde recibirás el pedido')
     }
 
     if (orderType === 'RESERVATION') {
@@ -67,15 +67,7 @@ export default function Checkout() {
     setLoading(true)
 
     try {
-      let coords = deliveryCoords
-      if (orderType === 'DELIVERY' && !coords && navigator.geolocation) {
-        coords = await new Promise(resolve => navigator.geolocation.getCurrentPosition(
-          p => resolve({ latitude: p.coords.latitude, longitude: p.coords.longitude }),
-          () => resolve(null),
-          { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 },
-        ))
-        if (coords) setDeliveryCoords(coords)
-      }
+      const coords = deliveryCoords
       // 1. Crear el pedido
       const orderPayload = {
         restaurantId,
@@ -149,8 +141,7 @@ export default function Checkout() {
   }
 
 
-  const handleSubmit = () => processCheckout(paymentMethod)
-  const handleMercadoPagoTest = () => processCheckout('MERCADOPAGO_TEST')
+  const handleSubmit = () => processCheckout('MERCADOPAGO_TEST')
 
   return (
     <div className="checkout">
@@ -184,12 +175,19 @@ export default function Checkout() {
               </h2>
 
               {orderType === 'DELIVERY' && (
-                <DeliveryForm
-                  address={deliveryAddress}    onAddressChange={setDeliveryAddress}
-                  district={deliveryDistrict}  onDistrictChange={setDeliveryDistrict}
-                  phone={deliveryPhone}        onPhoneChange={setDeliveryPhone}
-                  notes={deliveryNotes}        onNotesChange={setDeliveryNotes}
-                />
+                <>
+                  <DeliveryForm
+                    address={deliveryAddress}    onAddressChange={setDeliveryAddress}
+                    district={deliveryDistrict}  onDistrictChange={setDeliveryDistrict}
+                    phone={deliveryPhone}        onPhoneChange={setDeliveryPhone}
+                    notes={deliveryNotes}        onNotesChange={setDeliveryNotes}
+                  />
+                  <RestaurantLocationPicker
+                    value={deliveryCoords}
+                    onChange={setDeliveryCoords}
+                    instruction="Marca el punto exacto donde el repartidor debe entregarte el pedido."
+                  />
+                </>
               )}
 
               {orderType === 'RESERVATION' && (
@@ -201,23 +199,10 @@ export default function Checkout() {
               )}
             </section>
 
-            {/* 3. Método de pago */}
-            <section className="checkout-section">
-              <h2 className="checkout-section-title">
-                <span className="checkout-step">3</span>
-                Método de pago
-              </h2>
-              <PaymentMethod
-                value={paymentMethod}
-                onChange={setPaymentMethod}
-                orderType={orderType}
-              />
-            </section>
-
             {/* Notas generales */}
             <section className="checkout-section">
               <h2 className="checkout-section-title">
-                <span className="checkout-step">4</span>
+                <span className="checkout-step">3</span>
                 Notas adicionales <span className="checkout-optional">(opcional)</span>
               </h2>
               <textarea
@@ -237,9 +222,7 @@ export default function Checkout() {
               restaurantName={restaurantName}
               subtotal={subtotal}
               orderType={orderType}
-              paymentMethod={paymentMethod}
               onConfirm={handleSubmit}
-              onMercadoPagoTest={handleMercadoPagoTest}
               loading={loading}
             />
           </div>

@@ -12,10 +12,10 @@ function FitPoints({ points }) {
   return null
 }
 
-export default function DeliveryTrackingMap({ restaurant, destination, driver, phase = 'delivery', height = 320 }) {
+export default function DeliveryTrackingMap({ restaurant, destination, driver, phase = 'delivery', height = 320, showDestinationDuringPickup = true }) {
   const markers = [
     restaurant?.latitude != null && restaurant?.longitude != null && { key: 'restaurant', label: restaurant.name || 'Restaurante', point: [restaurant.latitude, restaurant.longitude], color: '#e85d24' },
-    destination?.latitude != null && destination?.longitude != null && { key: 'destination', label: 'Dirección de entrega', point: [destination.latitude, destination.longitude], color: '#16a34a' },
+    (phase !== 'pickup' || showDestinationDuringPickup) && destination?.latitude != null && destination?.longitude != null && { key: 'destination', label: 'Dirección del cliente', point: [destination.latitude, destination.longitude], color: '#16a34a' },
     driver?.latitude != null && driver?.longitude != null && { key: 'driver', label: driver.name || 'Repartidor', point: [driver.latitude, driver.longitude], color: '#2563eb' },
   ].filter(Boolean)
 

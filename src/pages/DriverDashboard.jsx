@@ -57,8 +57,10 @@ export default function DriverDashboard() {
     if (status === 'DELIVERED' && (!/^\d{6}$/.test(deliveryCode) || !proofUrl)) return toast.error('Ingresa el código de 6 dígitos y toma la foto de entrega')
     setBusy(order.id)
     try {
-      await auth(); await api.patch(`/api/v1/orders/${order.id}/status`, { status, ...(status === 'DELIVERED' && { deliveryCode, deliveryProofUrl: proofUrl }) })
-      toast.success(status === 'ON_THE_WAY' ? 'Entrega en camino' : 'Entrega completada'); setDeliveryCode(''); setProofUrl(''); qc.invalidateQueries({ queryKey: ['driver-active-orders'] })
+      await auth()
+      const { data } = await api.patch(`/api/v1/orders/${order.id}/status`, { status, ...(status === 'DELIVERED' && { deliveryCode, deliveryProofUrl: proofUrl }) })
+      if (status === 'ON_THE_WAY' && data.data) qc.setQueryData(['driver-active-orders'], currentOrders => (currentOrders || []).map(item => item.id === order.id ? data.data : item))
+      toast.success(status === 'ON_THE_WAY' ? 'Entrega en camino. La ruta ahora apunta al cliente.' : 'Entrega completada'); setDeliveryCode(''); setProofUrl(''); qc.invalidateQueries({ queryKey: ['driver-active-orders'] })
     } catch (error) { toast.error(error.response?.data?.message || 'No se pudo actualizar') }
     finally { setBusy(null) }
   }
@@ -71,7 +73,7 @@ export default function DriverDashboard() {
       <p><Package size={15}/> Recoger en <strong>{current.restaurant?.name}</strong>: {current.restaurant?.address}</p>
       {current.restaurant?.addressReference && <p><MapPin size={15}/> Referencia del restaurante: <strong>{current.restaurant.addressReference}</strong></p>}
       <p><MapPin size={15}/> Entregar a <strong>{current.user?.name}</strong>: {current.deliveryAddress}</p>
-      <DeliveryTrackingMap restaurant={current.restaurant} destination={{ latitude: current.deliveryLatitude, longitude: current.deliveryLongitude }} driver={{ ...position, name: 'Mi ubicación' }} phase={current.status === 'READY' ? 'pickup' : 'delivery'}/>
+      <DeliveryTrackingMap restaurant={current.restaurant} destination={{ latitude: current.deliveryLatitude, longitude: current.deliveryLongitude }} driver={{ ...position, name: 'Mi ubicación' }} phase={current.status === 'READY' ? 'pickup' : 'delivery'} showDestinationDuringPickup={false}/>
       {current.status === 'ON_THE_WAY' && <div className="ddash-proof"><h3>Validar entrega</h3><p>Pide al cliente su código de 6 dígitos y toma la foto al entregar.</p><input className="ddash-code-input" inputMode="numeric" maxLength={6} placeholder="Código de entrega" value={deliveryCode} onChange={event => setDeliveryCode(event.target.value.replace(/\D/g, '').slice(0, 6))}/><DeliveryProofCapture orderId={current.id} value={proofUrl} onUploaded={setProofUrl}/></div>}
       <div className="ddash-active-actions"><a className="ddash-route" target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir/?api=1&destination=${current.status === 'READY' ? `${current.restaurant?.latitude},${current.restaurant?.longitude}` : `${current.deliveryLatitude},${current.deliveryLongitude}`}`}><Navigation size={16}/> Abrir ruta</a><button className="dorder-accept" disabled={busy === current.id || current.status === 'ON_THE_WAY' && (!/^\d{6}$/.test(deliveryCode) || !proofUrl)} onClick={() => advance(current)}>{busy === current.id ? <Loader2 size={15} className="ddash-spinner"/> : <CheckCircle size={15}/>} {current.status === 'READY' ? 'Ya recogí el pedido' : 'Confirmar entrega'}</button></div>
       <small className="ddash-tracking">ID de delivery: {current.id}</small>

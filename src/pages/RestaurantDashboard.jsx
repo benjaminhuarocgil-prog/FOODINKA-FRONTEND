@@ -32,10 +32,6 @@ const NEXT_ACTIONS = {
 
 const STATUS_TABS = [
   { value: '',           label: 'Todos' },
-  { value: 'PENDING',    label: 'Nuevos' },
-  { value: 'CONFIRMED',  label: 'Confirmados' },
-  { value: 'PREPARING',  label: 'Preparando' },
-  { value: 'READY',      label: 'Listos' },
   { value: 'ON_THE_WAY', label: 'En camino' },
   { value: 'DELIVERED',  label: 'Entregados' },
   { value: 'CANCELLED',  label: 'Cancelados' },

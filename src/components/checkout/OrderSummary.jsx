@@ -1,12 +1,6 @@
 import { Loader2 } from 'lucide-react'
 import './OrderSummary.css'
 
-const PAYMENT_LABELS = {
-  CASH_ON_DELIVERY: '💵 Efectivo al recibir',
-  YAPE:             '📱 Yape',
-  MERCADOPAGO:      '💳 Mercado Pago',
-}
-
 const TYPE_LABELS = {
   DELIVERY:    '🛵 Delivery',
   RESERVATION: '📅 Reserva en local',
@@ -14,8 +8,7 @@ const TYPE_LABELS = {
 
 export default function OrderSummary({
   items, restaurantName, subtotal,
-  orderType, paymentMethod,
-  onConfirm, onMercadoPagoTest, loading,
+  orderType, onConfirm, loading,
 }) {
   return (
     <div className="osummary">
@@ -50,7 +43,7 @@ export default function OrderSummary({
         </div>
         <div className="osummary-meta-row">
           <span>Pago</span>
-          <span>{PAYMENT_LABELS[paymentMethod]}</span>
+          <span>💳 Mercado Pago</span>
         </div>
       </div>
 
@@ -75,23 +68,9 @@ export default function OrderSummary({
         <span>S/ {subtotal.toFixed(2)}</span>
       </div>
 
-      {/* Botón confirmar */}
-      <button
-        className="osummary-btn"
-        onClick={onConfirm}
-        disabled={loading}
-      >
-        {loading
-          ? <><Loader2 size={18} className="osummary-spinner" /> Procesando...</>
-          : orderType === 'DELIVERY'
-            ? '🛵 Confirmar pedido'
-            : '📅 Confirmar reserva'
-        }
-      </button>
-
       <button
         className="osummary-btn osummary-btn--mercadopago"
-        onClick={onMercadoPagoTest}
+        onClick={onConfirm}
         disabled={loading}
       >
         {loading

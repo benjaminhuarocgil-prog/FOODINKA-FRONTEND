@@ -17,7 +17,7 @@ function MapInteraction({ value, onChange }) {
   return value?.latitude && value?.longitude ? <Marker position={[value.latitude, value.longitude]} icon={markerIcon}/> : null
 }
 
-export default function RestaurantLocationPicker({ value, onChange }) {
+export default function RestaurantLocationPicker({ value, onChange, instruction = 'Marca exactamente la entrada del restaurante.' }) {
   const [error, setError] = useState('')
   const locate = () => {
     if (!navigator.geolocation) return setError('Tu dispositivo no permite obtener la ubicación')
@@ -29,7 +29,7 @@ export default function RestaurantLocationPicker({ value, onChange }) {
   }
   const center = value?.latitude && value?.longitude ? [value.latitude, value.longitude] : DEFAULT_CENTER
   return <div className="restaurant-location-picker">
-    <div className="restaurant-location-actions"><p>Marca exactamente la entrada del restaurante.</p><button type="button" onClick={locate}><LocateFixed size={16}/> Usar mi ubicación</button></div>
+    <div className="restaurant-location-actions"><p>{instruction}</p><button type="button" onClick={locate}><LocateFixed size={16}/> Usar mi ubicación</button></div>
     <MapContainer center={center} zoom={value?.latitude ? 16 : 12} style={{ height: 280, width: '100%', borderRadius: 12 }}>
       <TileLayer attribution="&copy; OpenStreetMap" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"/>
       <MapInteraction value={value} onChange={onChange}/>
