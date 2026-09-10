@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { Loader2, ArrowLeft, CheckCircle, XCircle } from 'lucide-react'
 import { useApi } from '../../hooks/useApi.js'
+import RestaurantLocationPicker from '../restaurant/RestaurantLocationPicker.jsx'
 import './RestaurantRegisterForm.css'
 
 const CATEGORIES = [
@@ -27,7 +28,7 @@ export default function RestaurantRegisterForm({ onSubmit, onBack, loading }) {
 
   const [form, setForm] = useState({
     name: '', ruc: '', category: '', description: '',
-    address: '', district: '', phone: '',
+    address: '', addressReference: '', district: '', phone: '', latitude: null, longitude: null,
   })
 
   const [rucStatus,  setRucStatus]  = useState(null) // null | 'checking' | 'valid' | 'invalid'
@@ -86,11 +87,11 @@ export default function RestaurantRegisterForm({ onSubmit, onBack, loading }) {
 
   const handleSubmit = async () => {
     if (rucStatus !== 'valid') return
-    if (!form.name || !form.category || !form.address || !form.district) return
+    if (!form.name || !form.category || !form.address || !form.district || form.latitude == null || form.longitude == null) return
     await onSubmit(form)
   }
 
-  const isValid = rucStatus === 'valid' && form.name && form.category && form.address && form.district
+  const isValid = rucStatus === 'valid' && form.name && form.category && form.address && form.district && form.latitude != null && form.longitude != null
 
   return (
     <div className="rrform">
@@ -189,6 +190,16 @@ export default function RestaurantRegisterForm({ onSubmit, onBack, loading }) {
             {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
           </select>
         </div>
+      </div>
+
+      <div className="rrform-field">
+        <label className="rrform-label">Referencia <span className="rrform-optional">(opcional)</span></label>
+        <input className="rrform-input" type="text" placeholder="Ej: puerta roja, frente al parque" value={form.addressReference} onChange={set('addressReference')}/>
+      </div>
+
+      <div className="rrform-field">
+        <label className="rrform-label">Ubicación exacta en el mapa *</label>
+        <RestaurantLocationPicker value={{ latitude: form.latitude, longitude: form.longitude }} onChange={coords => setForm(current => ({ ...current, ...coords }))}/>
       </div>
 
       {/* Teléfono */}

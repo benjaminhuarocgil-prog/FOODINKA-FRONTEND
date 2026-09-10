@@ -36,14 +36,8 @@ export default function Onboarding() {
   const handleRestaurantSubmit = async (formData) => {
     setLoading(true)
     try {
-      // 1. Cambiar rol a RESTAURANT_OWNER
       await api.patch('/api/v1/auth/me', { name: user?.name })
-      await api.patch(`/api/v1/auth/users/${formData.userId}/role`, {
-        role: 'RESTAURANT_OWNER',
-      })
-
-      // 2. Crear el restaurante (queda pendiente de verificación)
-      await api.post('/api/v1/restaurants', formData)
+      await api.post('/api/v1/auth/register-restaurant', formData)
 
       setStep('done')
     } catch (error) {

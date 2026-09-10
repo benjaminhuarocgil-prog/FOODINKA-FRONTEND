@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import Navbar from '../components/layout/Navbar.jsx'
 import LogoUploader from '../components/ui/LogoUploader.jsx'
+import RestaurantLocationPicker from '../components/restaurant/RestaurantLocationPicker.jsx'
 import { useCurrentUser } from '../hooks/useCurrentUser.js'
 import {
   useUpdateProfile, useUpdateRestaurant,
@@ -263,6 +264,12 @@ export function SectionRestaurant({ restaurant }) {
         placeholder="Cuéntanos sobre tu restaurante" onSave={description => update({ description })}/>
       <EditableField label="Dirección" value={restaurant.address} saving={isPending}
         placeholder="Dirección del local" onSave={address => update({ address })}/>
+      <EditableField label="Referencia" value={restaurant.addressReference} saving={isPending}
+        placeholder="Ej: puerta roja, frente al parque" onSave={addressReference => update({ addressReference })}/>
+      <div className="pf-field">
+        <label className="pf-field-label">Ubicación exacta para el recojo</label>
+        <RestaurantLocationPicker value={{ latitude: restaurant.latitude, longitude: restaurant.longitude }} onChange={coords => update(coords)}/>
+      </div>
       <EditableField label="Teléfono" value={restaurant.phone} saving={isPending}
         placeholder="01 234 5678" type="tel" onSave={phone => update({ phone })}/>
       <EditableField label="Costo de delivery (S/)" value={restaurant.deliveryFee?.toString()} saving={isPending}

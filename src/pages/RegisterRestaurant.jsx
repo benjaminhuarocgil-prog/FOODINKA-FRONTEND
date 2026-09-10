@@ -6,6 +6,7 @@ import {
   ChefHat, ArrowLeft, Loader2, CheckCircle,
   XCircle, MapPin, Phone, FileText, Store,
 } from 'lucide-react'
+import RestaurantLocationPicker from '../components/restaurant/RestaurantLocationPicker.jsx'
 import Navbar from '../components/layout/Navbar.jsx'
 import { useApi } from '../hooks/useApi.js'
 import { useCurrentUser } from '../hooks/useCurrentUser.js'
@@ -68,7 +69,7 @@ export default function RegisterRestaurant() {
 
   const [form, setForm] = useState({
     name: '', ruc: '', category: '', description: '',
-    address: '', district: '', phone: '',
+    address: '', addressReference: '', district: '', phone: '', latitude: null, longitude: null,
   })
   const [rucStatus, setRucStatus] = useState(null) // null | 'checking' | 'valid' | 'invalid'
   const [rucData,   setRucData]   = useState(null)
@@ -125,8 +126,11 @@ export default function RegisterRestaurant() {
         category:    form.category,
         description: form.description || undefined,
         address:     form.address,
+        addressReference: form.addressReference || undefined,
         district:    form.district,
         phone:       form.phone || undefined,
+        latitude:    form.latitude,
+        longitude:   form.longitude,
       })
       // Invalidar cache del usuario para que Navbar actualice el rol
       qc.invalidateQueries({ queryKey: ['current-user'] })
@@ -139,7 +143,7 @@ export default function RegisterRestaurant() {
     }
   }
 
-  const isValid = rucStatus === 'valid' && form.name && form.category && form.address && form.district
+  const isValid = rucStatus === 'valid' && form.name && form.category && form.address && form.district && form.latitude != null && form.longitude != null
 
   // ── Pantalla de éxito ─────────────────────────────────────
   if (done) {
@@ -339,6 +343,16 @@ export default function RegisterRestaurant() {
                   {DISTRICTS.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
+            </div>
+
+            <div className="rr-field">
+              <label className="rr-label">Referencia <span className="rr-optional">(opcional)</span></label>
+              <input className="rr-input" type="text" placeholder="Ej: puerta roja, frente al parque" value={form.addressReference} onChange={set('addressReference')}/>
+            </div>
+
+            <div className="rr-field">
+              <label className="rr-label">Ubicación exacta en el mapa <span className="rr-req">*</span></label>
+              <RestaurantLocationPicker value={{ latitude: form.latitude, longitude: form.longitude }} onChange={coords => setForm(current => ({ ...current, ...coords }))}/>
             </div>
 
             <div className="rr-field rr-field--half">
