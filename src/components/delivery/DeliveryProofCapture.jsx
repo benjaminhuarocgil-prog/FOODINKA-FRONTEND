@@ -7,18 +7,23 @@ const BUCKET = 'logos'
 
 async function uploadProof(file, orderId) {
   if (!SUPABASE_URL || !SUPABASE_ANON) throw new Error('Falta configurar Supabase Storage')
-  if (!file.type.startsWith('image/')) throw new Error('Debes tomar una fotografía')
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+  if (!allowedTypes.includes(file.type)) throw new Error('La foto debe ser JPG, PNG o WEBP')
   if (file.size > 8 * 1024 * 1024) throw new Error('La fotografía no puede superar 8 MB')
   const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
-  const path = `deliveries/${orderId}_${Date.now()}.${ext}`
+  // Reutiliza la carpeta autorizada por la política RLS del bucket de logos.
+  const path = `restaurants/deliveries/${orderId}_${Date.now()}.${ext}`
   const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`, {
     method: 'POST',
-    headers: { apikey: SUPABASE_ANON, 'Content-Type': file.type, 'x-upsert': 'false' },
+    headers: { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}`, 'Content-Type': file.type, 'x-upsert': 'false' },
     body: file,
   })
   if (!response.ok) {
     const error = await response.json().catch(() => ({}))
-    throw new Error(error.message || 'No se pudo subir la fotografía')
+    const message = error.message?.includes('row-level security')
+      ? 'Supabase bloqueó la foto. Revisa la política INSERT del bucket logos.'
+      : error.message
+    throw new Error(message || 'No se pudo subir la fotografía')
   }
   return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`
 }
@@ -39,7 +44,7 @@ export default function DeliveryProofCapture({ orderId, value, onUploaded }) {
       {uploading ? <Loader2 size={17} className="ddash-spinner"/> : value ? <CheckCircle2 size={17}/> : <Camera size={17}/>}
       {uploading ? 'Subiendo foto…' : value ? 'Foto subida · volver a tomar' : 'Tomar foto de entrega'}
     </button>
-    <input ref={inputRef} type="file" accept="image/*" capture="environment" hidden onChange={e => handlePhoto(e.target.files?.[0])}/>
+    <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden onChange={e => handlePhoto(e.target.files?.[0])}/>
     {value && <img className="ddash-proof-preview" src={value} alt="Comprobante de entrega"/>}
     {error && <small className="ddash-proof-error">{error}</small>}
   </div>
