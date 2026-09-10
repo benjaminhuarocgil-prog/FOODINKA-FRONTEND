@@ -26,11 +26,8 @@ const STATUS_CONFIG = {
 
 // Transiciones permitidas para RESTAURANT_OWNER
 const NEXT_ACTIONS = {
-  PENDING:   [{ to: 'CONFIRMED', label: 'Confirmar',   cls: 'btn-confirm' },
-              { to: 'CANCELLED', label: 'Cancelar',    cls: 'btn-cancel'  }],
-  CONFIRMED: [{ to: 'PREPARING', label: 'Iniciar prep.', cls: 'btn-prepare' },
-              { to: 'CANCELLED', label: 'Cancelar',      cls: 'btn-cancel'  }],
-  PREPARING: [{ to: 'READY',    label: 'Marcar listo', cls: 'btn-ready' }],
+  PENDING:   [{ to: 'CANCELLED', label: 'Cancelar pedido', cls: 'btn-cancel' }],
+  CONFIRMED: [{ to: 'CANCELLED', label: 'Cancelar pedido', cls: 'btn-cancel' }],
 }
 
 const STATUS_TABS = [

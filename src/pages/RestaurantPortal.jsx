@@ -3,12 +3,12 @@ import { useAuth0 } from '@auth0/auth0-react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import {
-  BarChart3, BookOpen, ChevronRight, ClipboardList, FileText,
+  BarChart3, BookOpen, ChevronRight, ClipboardList, FileText, CookingPot,
   House, LogOut, Menu as MenuIcon, Percent, ReceiptText, Search, Settings,
   ShoppingBag, Star, Store, TrendingUp, Users, X,
 } from 'lucide-react'
 import { useCurrentUser } from '../hooks/useCurrentUser.js'
-import { useRestaurantOrders } from '../hooks/useRestaurantOrders.js'
+import { useRestaurantOrders, useUpdateOrderStatus } from '../hooks/useRestaurantOrders.js'
 import { useApplyProductDiscount, useRestaurantProducts } from '../hooks/useProfile.js'
 import { SectionMenu, SectionRestaurant } from './Profile.jsx'
 import './Profile.css'
@@ -17,6 +17,7 @@ import './RestaurantPortal.css'
 const SECTIONS = [
   { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
   { id: 'menu', label: 'Menú', icon: BookOpen },
+  { id: 'preparacion', label: 'Preparación de menú', icon: CookingPot },
   { id: 'ventas', label: 'Datos de venta', icon: ClipboardList },
   { id: 'promociones', label: 'Promociones', icon: Percent },
   { id: 'facturacion', label: 'Facturación', icon: ReceiptText },
@@ -119,6 +120,31 @@ function Sales({ orders }) {
   </section>
 }
 
+function MenuPreparation({ orders }) {
+  const updateStatus = useUpdateOrderStatus()
+  const deliveryOrders = orders.filter(order => order.type === 'DELIVERY' && ['PENDING', 'CONFIRMED', 'PREPARING', 'READY'].includes(order.status))
+  const advance = async (order) => {
+    const status = ['PENDING', 'CONFIRMED'].includes(order.status) ? 'PREPARING' : 'READY'
+    try { await updateStatus.mutateAsync({ orderId: order.id, status }) }
+    catch { /* el hook muestra el error */ }
+  }
+
+  return <section className="rp-panel">
+    <div className="rp-panel-head"><div><h1>Preparación de menú</h1><p>Prepara los pedidos delivery y publícalos para los repartidores cuando estén listos.</p></div><CookingPot size={22}/></div>
+    {deliveryOrders.length === 0 ? <Empty>No hay pedidos delivery pendientes de preparación.</Empty> : <div className="rp-preparation-list">
+      {deliveryOrders.map(order => <article key={order.id} className="rp-preparation-card">
+        <div className="rp-preparation-head"><div><strong>Pedido #{order.orderNumber?.slice(-8)}</strong><small>{peruDate(order.createdAt)}</small></div><span className={`rp-preparation-status status-${order.status.toLowerCase()}`}>{order.status === 'PENDING' ? 'Pendiente' : order.status === 'CONFIRMED' ? 'Confirmado' : order.status === 'PREPARING' ? 'Preparando' : 'Listo para recoger'}</span></div>
+        <div className="rp-preparation-client"><span className="rp-user-avatar">{(order.user?.name || 'U')[0]}</span><div><small>Cliente</small><strong>{order.user?.name || 'Usuario'}</strong></div></div>
+        <div className="rp-order-items">{order.items?.map(item => <span key={item.id}>{item.quantity}× {itemName(item)}</span>)}</div>
+        {order.notes && <p className="rp-preparation-notes">Nota: {order.notes}</p>}
+        <div className="rp-preparation-action">
+          {order.status === 'READY' ? <p>Esperando que un repartidor tome el pedido.</p> : <button className="rp-primary" disabled={updateStatus.isPending} onClick={() => advance(order)}>{updateStatus.isPending ? 'Guardando…' : order.status === 'PREPARING' ? 'Listo para recoger' : 'Empezar preparación'}</button>}
+        </div>
+      </article>)}
+    </div>}
+  </section>
+}
+
 function Promotions({ restaurantId, orders }) {
   const { data: products = [], isLoading } = useRestaurantProducts(restaurantId)
   const discount = useApplyProductDiscount(restaurantId)
@@ -196,7 +222,7 @@ export default function RestaurantPortal() {
     </aside>
     <main className="rp-main"><header className="rp-topbar"><div><small>Panel del restaurante</small><strong>{SECTIONS.find(item => item.id === section)?.label}</strong></div></header>
       <div className="rp-content">{ordersLoading && section !== 'menu' && section !== 'promociones' ? <div className="rp-loading">Preparando tus datos…</div> : <>
-        {section === 'dashboard' && <Overview orders={orders} restaurant={restaurant}/>} {section === 'menu' && <SectionMenu restaurant={restaurant}/>} {section === 'ventas' && <Sales orders={orders}/>} {section === 'promociones' && <Promotions restaurantId={restaurant.id} orders={orders}/>} {section === 'facturacion' && <Billing orders={orders} restaurant={restaurant}/>} {section === 'configuracion' && <SectionRestaurant restaurant={restaurant}/>} </>}
+        {section === 'dashboard' && <Overview orders={orders} restaurant={restaurant}/>} {section === 'menu' && <SectionMenu restaurant={restaurant}/>} {section === 'preparacion' && <MenuPreparation orders={orders}/>} {section === 'ventas' && <Sales orders={orders}/>} {section === 'promociones' && <Promotions restaurantId={restaurant.id} orders={orders}/>} {section === 'facturacion' && <Billing orders={orders} restaurant={restaurant}/>} {section === 'configuracion' && <SectionRestaurant restaurant={restaurant}/>} </>}
       </div>
     </main>
   </div>

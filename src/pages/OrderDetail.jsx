@@ -124,6 +124,20 @@ export default function OrderDetail() {
                   </div>
                 </div>
               )}
+              <div className="odetail-info-row">
+                <Bike size={15} className="odetail-icon" />
+                <div>
+                  <p className="odetail-info-label">Delivery asignado</p>
+                  {order.driver ? <>
+                    <p className="odetail-info-value">{order.driver.user?.name || 'Repartidor'}</p>
+                    {order.driver.user?.phone && <p className="odetail-info-sub">Teléfono: {order.driver.user.phone}</p>}
+                    {order.driver.licensePlate && <p className="odetail-info-sub">Placa: {order.driver.licensePlate}</p>}
+                  </> : <>
+                    <p className="odetail-info-value">Aún sin repartidor</p>
+                    <p className="odetail-info-sub">{order.status === 'READY' ? 'Buscando un delivery disponible…' : 'Se buscará un delivery cuando el restaurante marque el pedido como listo.'}</p>
+                  </>}
+                </div>
+              </div>
             </div>
           </div>
         )}
