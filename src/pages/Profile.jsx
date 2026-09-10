@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import {
   User, Store, Bike, Pencil, Check, X,
-  Plus, Trash2, Eye, EyeOff, ChefHat,
+  Plus, Trash2, CircleCheck, CircleX, ChefHat,
   Loader2, ShoppingBag,
 } from 'lucide-react'
 import Navbar from '../components/layout/Navbar.jsx'
@@ -312,10 +312,10 @@ export function SectionMenu({ restaurant }) {
               </div>
               <div className="pf-product-actions">
                 <button className={`pf-icon-btn ${product.isAvailable ? 'pf-available' : 'pf-unavailable'}`}
-                  onClick={() => toggleProduct.mutate(product.id)} disabled={toggleProduct.isPending}
+                  onClick={() => toggleProduct.mutate({ id: product.id, isAvailable: !product.isAvailable })} disabled={toggleProduct.isPending}
                   title={product.isAvailable ? 'Ocultar para consumidores' : 'Mostrar para consumidores'}
                   aria-label={product.isAvailable ? 'Ocultar producto para consumidores' : 'Mostrar producto para consumidores'}>
-                  {product.isAvailable ? <Eye size={14}/> : <EyeOff size={14}/>}
+                  {product.isAvailable ? <CircleCheck size={16}/> : <CircleX size={16}/>}
                 </button>
                 <button className="pf-icon-btn pf-edit" onClick={() => setModal(product)}><Pencil size={14}/></button>
                 <button className="pf-icon-btn pf-delete" onClick={() => setConfirmDelete(product)}><Trash2 size={14}/></button>

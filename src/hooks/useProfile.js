@@ -147,22 +147,22 @@ export function useToggleProduct(restaurantId) {
   const { getAccessTokenSilently } = useAuth0()
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (id) => {
+    mutationFn: async ({ id, isAvailable }) => {
       await withAuth(getAccessTokenSilently)
-      const res = await api.patch(`/api/v1/products/${id}/availability`)
+      const res = await api.patch(`/api/v1/products/${id}/availability`, { isAvailable })
       return res.data
     },
-    onMutate: async (id) => {
+    onMutate: async ({ id, isAvailable }) => {
       const queryKey = ['restaurant-products', restaurantId]
       await qc.cancelQueries({ queryKey })
       const previous = qc.getQueryData(queryKey)
       qc.setQueryData(queryKey, (products = []) => products.map(product => product.id === id
-        ? { ...product, isAvailable: !product.isAvailable }
+        ? { ...product, isAvailable }
         : product
       ))
       return { previous, queryKey }
     },
-    onSuccess: (response, id) => {
+    onSuccess: (response, { id }) => {
       const updated = response?.data
       if (updated) qc.setQueryData(['restaurant-products', restaurantId], (products = []) => products.map(product => product.id === id ? { ...product, ...updated } : product))
       toast.success(updated?.isAvailable ? 'Producto visible para consumidores' : 'Producto oculto para consumidores')
@@ -171,7 +171,11 @@ export function useToggleProduct(restaurantId) {
       if (context?.queryKey) qc.setQueryData(context.queryKey, context.previous)
       toast.error(err?.response?.data?.message || 'No se pudo cambiar la visibilidad')
     },
-    onSettled: () => qc.invalidateQueries({ queryKey: ['restaurant-products', restaurantId] }),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['restaurant-products', restaurantId] })
+      qc.invalidateQueries({ queryKey: ['restaurant', restaurantId] })
+      qc.invalidateQueries({ queryKey: ['restaurants'] })
+    },
   })
 }
 

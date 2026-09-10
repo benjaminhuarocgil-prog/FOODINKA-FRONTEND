@@ -4,7 +4,7 @@ import { api } from '../config/api.js'
 // Restaurantes son públicos — no necesitan token
 export function useRestaurants(filters = {}) {
   const cleanFilters = Object.fromEntries(
-    Object.entries(filters).filter(([_, v]) => v !== '' && v !== null && v !== undefined && v !== false)
+    Object.entries(filters).filter(([, v]) => v !== '' && v !== null && v !== undefined && v !== false)
   )
   return useQuery({
     queryKey: ['restaurants', cleanFilters],
@@ -24,5 +24,8 @@ export function useRestaurant(id) {
       return data
     },
     enabled: !!id,
+    staleTime: 0,
+    refetchInterval: 5000,
+    refetchOnWindowFocus: true,
   })
 }
