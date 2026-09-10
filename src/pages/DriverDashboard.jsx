@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { MapPin, Package, ChevronRight, Loader2, Navigation, CheckCircle } from 'lucide-react'
@@ -21,10 +21,9 @@ export default function DriverDashboard() {
   const { data: active = [] } = useQuery({ queryKey: ['driver-active-orders'], queryFn: async () => { await auth(); return (await api.get('/api/v1/drivers/orders/active')).data.data }, enabled: isAuthenticated, refetchInterval: 5000 })
   const { data: orders = [], isLoading, refetch } = useQuery({ queryKey: ['driver-orders', district], queryFn: async () => { await auth(); return (await api.get('/api/v1/drivers/orders/available', { params: district === 'ALL' ? {} : { district } })).data.data }, enabled: isAuthenticated && !active.length, refetchInterval: active.length ? false : 10000 })
 
-  useEffect(() => {
-    if (!isAuthenticated) return
-    if (!navigator.geolocation) return
-    const id = navigator.geolocation.watchPosition(async ({ coords }) => {
+  const syncLocation = useCallback(() => {
+    if (!isAuthenticated || !navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(async ({ coords }) => {
       const next = { latitude: coords.latitude, longitude: coords.longitude }
       setPosition(next); setGpsStatus('Enviando ubicación…')
       try {
@@ -32,9 +31,14 @@ export default function DriverDashboard() {
         await api.patch('/api/v1/drivers/location', next)
         setGpsStatus(`Ubicación enviada · ${new Date().toLocaleTimeString('es-PE')}`)
       } catch (error) { setGpsStatus(error.response?.data?.message || 'No se pudo enviar la ubicación al servidor') }
-    }, error => setGpsStatus(error.code === 1 ? 'Permiso de ubicación bloqueado' : 'No se pudo leer el GPS'), { enableHighAccuracy: true, maximumAge: 0, timeout: 12000 })
-    return () => navigator.geolocation.clearWatch(id)
+    }, error => setGpsStatus(error.code === 1 ? 'Permiso de ubicación bloqueado' : `No se pudo leer el GPS (${error.message})`), { enableHighAccuracy: true, maximumAge: 0, timeout: 12000 })
   }, [isAuthenticated, getAccessTokenSilently])
+
+  useEffect(() => {
+    syncLocation()
+    const intervalId = window.setInterval(syncLocation, 4000)
+    return () => window.clearInterval(intervalId)
+  }, [syncLocation])
 
   const accept = async order => {
     const destination = order.restaurant?.latitude != null && order.restaurant?.longitude != null ? `${order.restaurant.latitude},${order.restaurant.longitude}` : encodeURIComponent(`${order.restaurant?.address || ''}, ${order.restaurant?.district || ''}, Perú`)
@@ -61,7 +65,7 @@ export default function DriverDashboard() {
 
   const current = active[0]
   return <div className="ddash"><Navbar/><div className="ddash-inner"><h1 className="ddash-title">Panel de repartidor</h1>
-    <div className={`ddash-gps-status ${position ? 'is-ok' : 'is-waiting'}`}><Navigation size={15}/><div><strong>{gpsStatus}</strong>{position && <small>{position.latitude.toFixed(6)}, {position.longitude.toFixed(6)}</small>}</div></div>
+    <div className={`ddash-gps-status ${position ? 'is-ok' : 'is-waiting'}`}><Navigation size={15}/><div><strong>{gpsStatus}</strong>{position && <small>{position.latitude.toFixed(6)}, {position.longitude.toFixed(6)}</small>}</div><button type="button" onClick={syncLocation}>Actualizar GPS ahora</button></div>
     {current ? <section className="ddash-active">
       <div className="ddash-active-head"><div><span className="ddash-live">● ENTREGA ACTIVA</span><h2>#{current.orderNumber?.slice(-8)}</h2></div><strong>S/ {current.total?.toFixed(2)}</strong></div>
       <p><Package size={15}/> Recoger en <strong>{current.restaurant?.name}</strong>: {current.restaurant?.address}</p>
