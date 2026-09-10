@@ -56,6 +56,13 @@ export default function DriverDashboard() {
   }
 
   const current = active[0]
+  const currentDestination = current?.status === 'READY'
+    ? (current.restaurant?.latitude != null && current.restaurant?.longitude != null
+      ? `${current.restaurant.latitude},${current.restaurant.longitude}`
+      : encodeURIComponent(`${current.restaurant?.address || ''}, ${current.restaurant?.district || ''}, Perú`))
+    : (current?.deliveryLatitude != null && current?.deliveryLongitude != null
+      ? `${current.deliveryLatitude},${current.deliveryLongitude}`
+      : encodeURIComponent(`${current?.deliveryAddress || ''}, ${current?.deliveryDistrict || ''}, Perú`))
   return <div className="ddash"><Navbar/><div className="ddash-inner"><h1 className="ddash-title">Panel de repartidor</h1>
     {current ? <section className="ddash-active">
       <div className="ddash-active-head"><div><span className="ddash-live">● ENTREGA ACTIVA</span><h2>#{current.orderNumber?.slice(-8)}</h2></div><strong>S/ {current.total?.toFixed(2)}</strong></div>
@@ -63,7 +70,7 @@ export default function DriverDashboard() {
       {current.restaurant?.addressReference && <p><MapPin size={15}/> Referencia del restaurante: <strong>{current.restaurant.addressReference}</strong></p>}
       <p><MapPin size={15}/> Entregar a <strong>{current.user?.name}</strong>: {current.deliveryAddress}</p>
       {current.status === 'ON_THE_WAY' && <div className="ddash-proof"><h3>Validar entrega</h3><p>Pide al cliente su código de 6 dígitos y toma la foto al entregar.</p><input className="ddash-code-input" inputMode="numeric" maxLength={6} placeholder="Código de entrega" value={deliveryCode} onChange={event => setDeliveryCode(event.target.value.replace(/\D/g, '').slice(0, 6))}/><DeliveryProofCapture orderId={current.id} value={proofUrl} onUploaded={setProofUrl}/></div>}
-      <div className="ddash-active-actions"><a className="ddash-route" target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir/?api=1&destination=${current.status === 'READY' ? `${current.restaurant?.latitude},${current.restaurant?.longitude}` : `${current.deliveryLatitude},${current.deliveryLongitude}`}`}><Navigation size={16}/> Abrir ruta</a><button className="dorder-accept" disabled={busy === current.id || current.status === 'ON_THE_WAY' && (!/^\d{6}$/.test(deliveryCode) || !proofUrl)} onClick={() => advance(current)}>{busy === current.id ? <Loader2 size={15} className="ddash-spinner"/> : <CheckCircle size={15}/>} {current.status === 'READY' ? 'Ya recogí el pedido' : 'Confirmar entrega'}</button></div>
+      <div className="ddash-active-actions"><a className="ddash-route" target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir/?api=1&destination=${currentDestination}`}><Navigation size={16}/> {current.status === 'READY' ? 'Abrir ruta al restaurante' : 'Entregar pedido al cliente'}</a><button className="dorder-accept" disabled={busy === current.id || current.status === 'ON_THE_WAY' && (!/^\d{6}$/.test(deliveryCode) || !proofUrl)} onClick={() => advance(current)}>{busy === current.id ? <Loader2 size={15} className="ddash-spinner"/> : <CheckCircle size={15}/>} {current.status === 'READY' ? 'Ya recogí el pedido' : 'Confirmar entrega'}</button></div>
       <small className="ddash-tracking">ID de delivery: {current.id}</small>
     </section> : <><div className="ddash-zone"><h2 className="ddash-zone-title"><MapPin size={18}/> Filtrar por distrito de recojo</h2><select className="ddash-select" value={district} onChange={event => setDistrict(event.target.value)}><option value="ALL">Todos los distritos</option>{DISTRICTS.map(item => <option key={item}>{item}</option>)}</select></div>
       {isLoading && <div className="ddash-loading"><Loader2 className="ddash-spinner"/></div>}
