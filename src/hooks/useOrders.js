@@ -34,6 +34,6 @@ export function useOrderDetail(id) {
       return data.data
     },
     enabled: isAuthenticated && !!id,
-    refetchInterval: query => ['DELIVERED', 'CANCELLED'].includes(query.state.data?.status) ? false : 5000,
+    refetchInterval: query => ['DELIVERED', 'CANCELLED'].includes(query.state.data?.status) ? false : 30000,
   })
 }

@@ -25,7 +25,7 @@ export function useRestaurant(id) {
     },
     enabled: !!id,
     staleTime: 0,
-    refetchInterval: 5000,
+    refetchInterval: 30000,
     refetchOnWindowFocus: true,
   })
 }

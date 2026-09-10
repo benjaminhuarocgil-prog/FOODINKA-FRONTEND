@@ -23,7 +23,7 @@ export function useRestaurantOrders(restaurantId, params = {}) {
       return data
     },
     enabled: isAuthenticated && !!restaurantId,
-    refetchInterval: 5000,
+    refetchInterval: 30000,
     placeholderData: (prev) => prev,
   })
 }

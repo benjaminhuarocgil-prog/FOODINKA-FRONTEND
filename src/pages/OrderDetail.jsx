@@ -4,7 +4,6 @@ import { ArrowLeft, MapPin, Phone, Clock, Calendar, Bike, User, RefreshCw } from
 import toast from 'react-hot-toast'
 import Navbar from '../components/layout/Navbar.jsx'
 import OrderStatusBadge, { OrderProgressBar } from '../components/orders/OrderStatusBadge.jsx'
-import DeliveryTrackingMap from '../components/delivery/DeliveryTrackingMap.jsx'
 import { useOrderDetail } from '../hooks/useOrders.js'
 import { useApi } from '../hooks/useApi.js'
 import './OrderDetail.css'
@@ -226,20 +225,6 @@ export default function OrderDetail() {
             <a href={order.deliveryProofUrl} target="_blank" rel="noreferrer">
               <img className="odetail-proof-image" src={order.deliveryProofUrl} alt="Fotografía de la entrega"/>
             </a>
-          </div>
-        )}
-
-        {order.type === 'DELIVERY' && order.driver && (
-          <div className="odetail-card">
-            <h2 className="odetail-card-title"><MapPin size={16} /> Seguimiento en vivo</h2>
-            <p className="odetail-tracking-id">Código de seguimiento: <strong>{order.id}</strong></p>
-            <DeliveryTrackingMap
-              restaurant={order.restaurant}
-              destination={{ latitude: order.deliveryLatitude, longitude: order.deliveryLongitude }}
-              driver={{ latitude: order.driver.currentLatitude, longitude: order.driver.currentLongitude, name: order.driver.user?.name }}
-              phase={order.status === 'READY' ? 'pickup' : 'delivery'}
-            />
-            {order.driver.lastLocationAt && <p className="odetail-location-time">Ubicación actualizada: {new Date(order.driver.lastLocationAt).toLocaleTimeString('es-PE')}</p>}
           </div>
         )}
 
