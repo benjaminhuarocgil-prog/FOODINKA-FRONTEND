@@ -9,16 +9,21 @@ import Navbar from '../components/layout/Navbar.jsx'
 import DeliveryProofCapture from '../components/delivery/DeliveryProofCapture.jsx'
 import './DriverDashboard.css'
 
-const DISTRICTS = ['Miraflores','San Isidro','Barranco','Surco','La Molina','San Borja','Cercado de Lima','Lince','Jesús María','Magdalena','San Miguel','Pueblo Libre','Breña','Rímac','Los Olivos','San Martín de Porres','Ate','La Victoria','Chorrillos']
-
 export default function DriverDashboard() {
-  const { getAccessTokenSilently, isAuthenticated } = useAuth0(); useApi()
+  const { getAccessTokenSilently, isAuthenticated, user } = useAuth0(); useApi()
   const qc = useQueryClient()
-  const [district, setDistrict] = useState('ALL'), [busy, setBusy] = useState(null)
+  const [busy, setBusy] = useState(null)
   const [deliveryCode, setDeliveryCode] = useState(''), [proofUrl, setProofUrl] = useState('')
+  // Cada cuenta necesita su propia caché: al cambiar de repartidor no deben
+  // reutilizarse los pedidos activos ni la lista del repartidor anterior.
+  const driverKey = user?.sub
+  const activeOrdersKey = ['driver-active-orders', driverKey]
+  const availableOrdersKey = ['driver-orders', driverKey]
   const auth = async () => setAuthToken(await getAccessTokenSilently({ authorizationParams: { audience: import.meta.env.VITE_AUTH0_AUDIENCE } }))
-  const { data: active = [] } = useQuery({ queryKey: ['driver-active-orders'], queryFn: async () => { await auth(); return (await api.get('/api/v1/drivers/orders/active')).data.data }, enabled: isAuthenticated, refetchInterval: 20000 })
-  const { data: orders = [], isLoading, refetch } = useQuery({ queryKey: ['driver-orders', district], queryFn: async () => { await auth(); return (await api.get('/api/v1/drivers/orders/available', { params: district === 'ALL' ? {} : { district } })).data.data }, enabled: isAuthenticated && !active.length, refetchInterval: active.length ? false : 30000 })
+  const { data: active = [] } = useQuery({ queryKey: activeOrdersKey, queryFn: async () => { await auth(); return (await api.get('/api/v1/drivers/orders/active')).data.data }, enabled: isAuthenticated && Boolean(driverKey), refetchInterval: 20000 })
+  // La bolsa de pedidos es global: todos los repartidores ven todos los READY
+  // sin repartidor, sin limitarla al distrito de su perfil.
+  const { data: orders = [], isLoading, refetch } = useQuery({ queryKey: availableOrdersKey, queryFn: async () => { await auth(); return (await api.get('/api/v1/drivers/orders/available')).data.data }, enabled: isAuthenticated && Boolean(driverKey) && !active.length, refetchInterval: active.length ? false : 30000 })
 
   const accept = async order => {
     const destination = order.restaurant?.latitude != null && order.restaurant?.longitude != null ? `${order.restaurant.latitude},${order.restaurant.longitude}` : encodeURIComponent(`${order.restaurant?.address || ''}, ${order.restaurant?.district || ''}, Perú`)
@@ -27,7 +32,7 @@ export default function DriverDashboard() {
       await auth(); await api.patch(`/api/v1/orders/${order.id}/assign-driver`)
       if (routeWindow) routeWindow.location.href = `https://www.google.com/maps/dir/?api=1&destination=${destination}`
       toast.success('Pedido tomado. Sigue la ruta hacia el restaurante.')
-      await qc.invalidateQueries({ queryKey: ['driver-active-orders'] }); refetch()
+      await qc.invalidateQueries({ queryKey: activeOrdersKey }); await qc.invalidateQueries({ queryKey: availableOrdersKey }); refetch()
     } catch (error) { routeWindow?.close(); toast.error(error.response?.data?.message || 'No se pudo tomar el pedido') }
     finally { setBusy(null) }
   }
@@ -39,8 +44,8 @@ export default function DriverDashboard() {
     try {
       await auth()
       const { data } = await api.patch(`/api/v1/orders/${order.id}/status`, { status, ...(status === 'DELIVERED' && { deliveryCode, deliveryProofUrl: proofUrl }) })
-      if (status === 'ON_THE_WAY' && data.data) qc.setQueryData(['driver-active-orders'], currentOrders => (currentOrders || []).map(item => item.id === order.id ? data.data : item))
-      toast.success(status === 'ON_THE_WAY' ? 'Entrega en camino. La ruta ahora apunta al cliente.' : 'Entrega completada'); setDeliveryCode(''); setProofUrl(''); qc.invalidateQueries({ queryKey: ['driver-active-orders'] })
+      if (status === 'ON_THE_WAY' && data.data) qc.setQueryData(activeOrdersKey, currentOrders => (currentOrders || []).map(item => item.id === order.id ? data.data : item))
+      toast.success(status === 'ON_THE_WAY' ? 'Entrega en camino. La ruta ahora apunta al cliente.' : 'Entrega completada'); setDeliveryCode(''); setProofUrl(''); qc.invalidateQueries({ queryKey: activeOrdersKey })
     } catch (error) { toast.error(error.response?.data?.message || 'No se pudo actualizar') }
     finally { setBusy(null) }
   }
@@ -55,7 +60,7 @@ export default function DriverDashboard() {
       {current.status === 'ON_THE_WAY' && <div className="ddash-proof"><h3>Validar entrega</h3><p>Pide al cliente su código de 6 dígitos y toma la foto al entregar.</p><input className="ddash-code-input" inputMode="numeric" maxLength={6} placeholder="Código de entrega" value={deliveryCode} onChange={event => setDeliveryCode(event.target.value.replace(/\D/g, '').slice(0, 6))}/><DeliveryProofCapture orderId={current.id} value={proofUrl} onUploaded={setProofUrl}/></div>}
       <div className="ddash-active-actions"><a className="ddash-route" target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir/?api=1&destination=${current.status === 'READY' ? `${current.restaurant?.latitude},${current.restaurant?.longitude}` : `${current.deliveryLatitude},${current.deliveryLongitude}`}`}><Navigation size={16}/> Abrir ruta</a><button className="dorder-accept" disabled={busy === current.id || current.status === 'ON_THE_WAY' && (!/^\d{6}$/.test(deliveryCode) || !proofUrl)} onClick={() => advance(current)}>{busy === current.id ? <Loader2 size={15} className="ddash-spinner"/> : <CheckCircle size={15}/>} {current.status === 'READY' ? 'Ya recogí el pedido' : 'Confirmar entrega'}</button></div>
       <small className="ddash-tracking">ID de delivery: {current.id}</small>
-    </section> : <><div className="ddash-zone"><h2 className="ddash-zone-title"><MapPin size={18}/> Zona de recojo (distrito del restaurante)</h2><select className="ddash-select" value={district} onChange={event => setDistrict(event.target.value)}><option value="ALL">Todos los distritos</option>{DISTRICTS.map(item => <option key={item}>{item}</option>)}</select></div>
+    </section> : <>
       {isLoading && <div className="ddash-loading"><Loader2 className="ddash-spinner"/></div>}
       <div className="ddash-orders">{orders.map(order => <div className="dorder" key={order.id}><div className="dorder-header"><div><p className="dorder-number">#{order.orderNumber?.slice(-8)}</p><p className="dorder-restaurant">{order.restaurant?.name} · {order.restaurant?.address}, {order.restaurant?.district}</p>{order.restaurant?.addressReference && <p className="dorder-restaurant">Referencia: {order.restaurant.addressReference}</p>}</div></div><div className="dorder-delivery"><MapPin size={13}/> Entrega en {order.deliveryAddress}, {order.deliveryDistrict}</div><div className="dorder-footer"><b>S/ {order.total?.toFixed(2)}</b><button className="dorder-accept" onClick={() => accept(order)} disabled={busy === order.id}>{busy === order.id ? <Loader2 className="ddash-spinner" size={14}/> : <ChevronRight size={14}/>} Tomar pedido</button></div></div>)}</div>
       {!isLoading && !orders.length && <div className="ddash-empty"><p>No hay pedidos listos para recoger ahora mismo</p></div>}</>}
