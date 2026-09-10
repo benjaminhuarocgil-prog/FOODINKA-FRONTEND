@@ -253,3 +253,14 @@
   .myorders-inner  { padding: 20px 16px 48px; }
   .myorders-crm    { grid-template-columns: 1fr 1fr; }
 }
+
+.myorder-rating { margin-top: 12px; padding-top: 12px; border-top: 1px solid #f3f4f6; }
+.myorder-rating p { margin: 0 0 8px; color: #4b5563; font-size: .82rem; }
+.myorder-rating-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.myorder-stars { display: flex; gap: 3px; }
+.myorder-stars button { border: 0; padding: 2px; background: transparent; color: #d1d5db; cursor: pointer; line-height: 0; }
+.myorder-stars button.selected { color: #f59e0b; }
+.myorder-rating-submit { border: 0; border-radius: 8px; padding: 7px 11px; background: #e85d24; color: #fff; font-size: .78rem; font-weight: 700; cursor: pointer; }
+.myorder-rating-submit:disabled { opacity: .5; cursor: not-allowed; }
+.myorder-rating-error { display: block; margin-top: 7px; color: #b42318; font-size: .75rem; }
+.myorder-rated { display: flex; align-items: center; gap: 5px; margin: 12px 0 0; color: #b45309; font-size: .8rem; font-weight: 600; }

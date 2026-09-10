@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ShoppingBag, ChevronRight, Calendar, Bike } from 'lucide-react'
+import { ShoppingBag, ChevronRight, Calendar, Bike, Star } from 'lucide-react'
 import Navbar from '../components/layout/Navbar.jsx'
 import OrderStatusBadge from '../components/orders/OrderStatusBadge.jsx'
-import { useMyOrders } from '../hooks/useOrders.js'
+import { useMyOrders, useRateDriver } from '../hooks/useOrders.js'
 import './MyOrders.css'
 
 const FILTER_OPTIONS = [
@@ -60,9 +60,18 @@ function CRMStats({ crm }) {
 }
 
 function OrderCard({ order, onClick }) {
+  const [selectedScore, setSelectedScore] = useState(0)
+  const rateDriver = useRateDriver()
   const date     = new Date(order.createdAt).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
   const time     = new Date(order.createdAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
   const isActive = !['DELIVERED', 'CANCELLED'].includes(order.status)
+  const canRateDriver = order.type === 'DELIVERY' && order.status === 'DELIVERED' && order.driver && !order.driverRating
+
+  const submitRating = async event => {
+    event.stopPropagation()
+    if (!selectedScore) return
+    await rateDriver.mutateAsync({ orderId: order.id, score: selectedScore })
+  }
 
   return (
     <div
@@ -102,6 +111,20 @@ function OrderCard({ order, onClick }) {
         <span className="myorder-total">S/ {order.total?.toFixed(2)}</span>
         <OrderStatusBadge status={order.status} />
       </div>
+
+      {canRateDriver && (
+        <div className="myorder-rating" onClick={event => event.stopPropagation()}>
+          <p>¿Cómo fue tu delivery con <strong>{order.driver.user?.name || 'tu repartidor'}</strong>?</p>
+          <div className="myorder-rating-actions">
+            <div className="myorder-stars" aria-label="Calificar repartidor">
+              {[1, 2, 3, 4, 5].map(score => <button key={score} type="button" className={score <= selectedScore ? 'selected' : ''} onClick={() => setSelectedScore(score)} aria-label={`${score} estrella${score > 1 ? 's' : ''}`}><Star size={21} fill="currentColor" /></button>)}
+            </div>
+            <button type="button" className="myorder-rating-submit" disabled={!selectedScore || rateDriver.isPending} onClick={submitRating}>{rateDriver.isPending ? 'Enviando…' : 'Calificar'}</button>
+          </div>
+          {rateDriver.isError && <small className="myorder-rating-error">{rateDriver.error?.response?.data?.message || 'No se pudo guardar la calificación'}</small>}
+        </div>
+      )}
+      {order.driverRating && <p className="myorder-rated"><Star size={14} fill="currentColor" /> Calificaste a tu repartidor: {order.driverRating.score}/5</p>}
     </div>
   )
 }

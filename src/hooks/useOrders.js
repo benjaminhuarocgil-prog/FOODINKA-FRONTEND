@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth0 } from '@auth0/auth0-react'
 import { api, setAuthToken } from '../config/api.js'
 
@@ -35,5 +35,25 @@ export function useOrderDetail(id) {
     },
     enabled: isAuthenticated && !!id,
     refetchInterval: query => ['DELIVERED', 'CANCELLED'].includes(query.state.data?.status) ? false : 30000,
+  })
+}
+
+export function useRateDriver() {
+  const { getAccessTokenSilently } = useAuth0()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ orderId, score }) => {
+      const token = await getAccessTokenSilently({
+        authorizationParams: { audience: import.meta.env.VITE_AUTH0_AUDIENCE },
+      })
+      setAuthToken(token)
+      const { data } = await api.post(`/api/v1/orders/${orderId}/driver-rating`, { score })
+      return data.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-orders'] })
+      queryClient.invalidateQueries({ queryKey: ['order'] })
+    },
   })
 }
