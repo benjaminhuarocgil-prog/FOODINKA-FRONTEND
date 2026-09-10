@@ -237,6 +237,7 @@ export default function OrderDetail() {
               restaurant={order.restaurant}
               destination={{ latitude: order.deliveryLatitude, longitude: order.deliveryLongitude }}
               driver={{ latitude: order.driver.currentLatitude, longitude: order.driver.currentLongitude, name: order.driver.user?.name }}
+              phase={order.status === 'READY' ? 'pickup' : 'delivery'}
             />
             {order.driver.lastLocationAt && <p className="odetail-location-time">Ubicación actualizada: {new Date(order.driver.lastLocationAt).toLocaleTimeString('es-PE')}</p>}
           </div>

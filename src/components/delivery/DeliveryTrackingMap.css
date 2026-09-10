@@ -1,3 +1,4 @@
 .tracking-map { width: 100%; overflow: hidden; border: 1px solid #eadfd9; border-radius: 16px; background: #f4f4f4; }
 .tracking-map-canvas { width: 100%; height: 100%; }
 .tracking-map-empty { padding: 28px 18px; border: 1px dashed #d8c9c1; border-radius: 14px; background: #fffaf7; color: #78665d; text-align: center; font-size: .88rem; }
+.tracking-map-wrap{display:grid;gap:8px}.tracking-map-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.75rem;color:#667085}.tracking-map-legend span{display:flex;align-items:center;gap:5px}.tracking-map-legend i{width:10px;height:10px;border-radius:50%;display:block}.tracking-map-legend .restaurant{background:#e85d24}.tracking-map-legend .driver{background:#2563eb}.tracking-map-legend .destination{background:#16a34a}.tracking-map-route{margin:0;color:#2563eb;font-size:.78rem;font-weight:700}

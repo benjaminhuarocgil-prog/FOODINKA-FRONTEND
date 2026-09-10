@@ -167,6 +167,7 @@ function OrderCard({ order, onAction, isUpdating }) {
                 restaurant={order.restaurant}
                 destination={{ latitude: order.deliveryLatitude, longitude: order.deliveryLongitude }}
                 driver={{ latitude: order.driver.currentLatitude, longitude: order.driver.currentLongitude, name: order.driver.user?.name }}
+                phase={order.status === 'READY' ? 'pickup' : 'delivery'}
                 height={260}
               />
             </>
