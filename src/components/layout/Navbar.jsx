@@ -24,6 +24,8 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
   const isAdmin           = role === 'ADMIN'
   const isDriver          = role === 'DELIVERY'
   const isRestaurantOwner = role === 'RESTAURANT_OWNER'
+  const isConsumer        = isAuthenticated && !isAdmin && !isDriver && !isRestaurantOwner
+  const logoDestination   = isDriver ? '/driver' : '/'
 
   const handleLogout = () => {
     sessionStorage.removeItem('foodinka_authenticated')
@@ -85,7 +87,7 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
         )}
 
         {/* Logo imagen */}
-        <Link to="/" className="navbar-logo">
+        <Link to={logoDestination} className="navbar-logo">
           <img
             src="/logo.jpeg"
             alt="Antojia"
@@ -101,12 +103,14 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
 
         {/* Acciones desktop */}
         <div className={`navbar-actions ${!isAuthenticated ? 'navbar-actions--guest' : ''}`}>
-          {isAuthenticated && <button className="navbar-orders" onClick={() => go('/orders')}>Mis pedidos</button>}
-          <Link to="/cart" className="navbar-cart">
-            <ShoppingCart size={20} />
-            <span className="navbar-cart-label">Carrito</span>
-            {count > 0 && <span className="navbar-cart-badge">{count}</span>}
-          </Link>
+          {isConsumer && <button className="navbar-orders" onClick={() => go('/orders')}>Mis pedidos</button>}
+          {(!isAuthenticated || isConsumer) && (
+            <Link to="/cart" className="navbar-cart">
+              <ShoppingCart size={20} />
+              <span className="navbar-cart-label">Carrito</span>
+              {count > 0 && <span className="navbar-cart-badge">{count}</span>}
+            </Link>
+          )}
 
           {!isAuthenticated && (
             <div className="navbar-auth-actions">
@@ -142,26 +146,32 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
             <button onClick={() => setMenuOpen(false)} aria-label="Cerrar"><X size={19}/></button>
           </div>
           <nav className="navbar-drawer-links">
-          <Link to="/" onClick={() => setMenuOpen(false)}>Inicio</Link>
-          <Link to="/cart" onClick={() => setMenuOpen(false)}>Carrito {count > 0 && `(${count})`}</Link>
+          {!isDriver && <Link to="/" onClick={() => setMenuOpen(false)}>Inicio</Link>}
           {!isAuthenticated
             ? <>
+                <Link to="/cart" onClick={() => setMenuOpen(false)}>Carrito {count > 0 && `(${count})`}</Link>
                 <button onClick={() => { setMenuOpen(false); setRegisterOpen(true) }}>Registrarse</button>
                 <button onClick={() => { setMenuOpen(false); setLoginOpen(true) }}>Iniciar sesión</button>
               </>
             : <>
-                <Link to="/profile" onClick={() => setMenuOpen(false)}>Mi perfil</Link>
-                <Link to="/orders" onClick={() => setMenuOpen(false)}>Mis pedidos y seguimiento</Link>
+                {isConsumer && <>
+                  <Link to="/cart" onClick={() => setMenuOpen(false)}>Carrito {count > 0 && `(${count})`}</Link>
+                  <Link to="/profile" onClick={() => setMenuOpen(false)}>Mi perfil</Link>
+                  <Link to="/orders" onClick={() => setMenuOpen(false)}>Mis pedidos y seguimiento</Link>
+                </>}
                 {isRestaurantOwner && (
                   <Link to="/restaurant-dashboard" onClick={() => setMenuOpen(false)}>
-                    Panel del restaurante
+                    Dashboard del restaurante
                   </Link>
                 )}
                 {isDriver && (
-                  <Link to="/driver" onClick={() => setMenuOpen(false)}>Panel repartidor</Link>
+                  <>
+                    <Link to="/profile" onClick={() => setMenuOpen(false)}>Mi perfil</Link>
+                    <Link to="/driver" onClick={() => setMenuOpen(false)}>Panel de delivery</Link>
+                  </>
                 )}
                 {isAdmin && (
-                  <Link to="/admin" onClick={() => setMenuOpen(false)}>Dashboard admin</Link>
+                  <Link to="/admin" onClick={() => setMenuOpen(false)}>Dashboard del administrador</Link>
                 )}
                 <button className="navbar-drawer-logout" onClick={handleLogout}><LogOut size={16}/> Cerrar sesión</button>
               </>
