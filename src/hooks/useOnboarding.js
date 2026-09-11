@@ -20,19 +20,27 @@ export function useOnboarding() {
       try {
         const { data } = await api.post('/api/v1/auth/sync')
         await queryClient.invalidateQueries({ queryKey: ['current-user'] })
+        const roleHome = {
+          DELIVERY: '/driver',
+          RESTAURANT_OWNER: '/restaurant-dashboard',
+          ADMIN: '/admin',
+          CONSUMER: '/',
+        }
+        const loginRole = sessionStorage.getItem('foodinka_login_role')
+        sessionStorage.removeItem('foodinka_login_role')
+
+        // Al iniciar sesión, la ruta se decide por el rol real almacenado
+        // en la cuenta, no solo por la opción que se presionó en el modal.
+        if (loginRole) {
+          navigate(roleHome[data.data?.role] || '/', { replace: true })
+          return
+        }
+
         // Solo redirigir al onboarding si es usuario NUEVO
         if (data.message === 'Usuario creado') {
           const target = sessionStorage.getItem('foodinka_registration_target')
           sessionStorage.removeItem('foodinka_registration_target')
           navigate(target || '/onboarding')
-        } else if (location.pathname === '/') {
-          const roleHome = {
-            DELIVERY: '/driver',
-            RESTAURANT_OWNER: '/restaurant-dashboard',
-            ADMIN: '/admin',
-          }
-          const destination = roleHome[data.data?.role]
-          if (destination) navigate(destination, { replace: true })
         }
       } catch (err) {
         // 409 = usuario ya existe → no es error, continuar normalmente

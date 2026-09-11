@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
 import {
   ShoppingCart, Menu, X, User, LogOut,
-  LayoutDashboard, Bike, ClipboardList, Store, UtensilsCrossed, ArrowRight, MapPin, Search,
+  LayoutDashboard, Bike, Store, UtensilsCrossed, ArrowRight, MapPin, Search,
 } from 'lucide-react'
 import { useCartStore } from '../../store/cartStore.js'
 import { useCurrentUser } from '../../hooks/useCurrentUser.js'
@@ -14,8 +14,8 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
   const { isAuthenticated, loginWithRedirect, logout, user } = useAuth0()
   const { data: dbUser } = useCurrentUser()
   const [menuOpen,    setMenuOpen]    = useState(false)
-  const [profileOpen, setProfileOpen] = useState(false)
   const [registerOpen, setRegisterOpen] = useState(false)
+  const [loginOpen, setLoginOpen] = useState(false)
   const navigate   = useNavigate()
   const totalItems = useCartStore(s => s.getTotalItems())
   const count      = cartCount ?? totalItems
@@ -24,19 +24,14 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
   const isAdmin           = role === 'ADMIN'
   const isDriver          = role === 'DELIVERY'
   const isRestaurantOwner = role === 'RESTAURANT_OWNER'
-  // Una sesión sin rol especializado también es tratada como cliente.
-  // Así el menú no desaparece mientras termina de cargar el perfil de la BD.
-  const isConsumer        = isAuthenticated && !isAdmin && !isDriver && !isRestaurantOwner
 
   const handleLogout = () => {
-    setProfileOpen(false)
     sessionStorage.removeItem('foodinka_authenticated')
     sessionStorage.removeItem('foodinka_recovery_attempted')
     logout({ logoutParams: { returnTo: window.location.origin } })
   }
 
   const go = (path) => {
-    setProfileOpen(false)
     setMenuOpen(false)
     navigate(path)
   }
@@ -49,6 +44,13 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
       authorizationParams: { screen_hint: 'signup' },
       appState: { returnTo },
     })
+  }
+
+  const loginAs = (role) => {
+    setLoginOpen(false)
+    setMenuOpen(false)
+    sessionStorage.setItem('foodinka_login_role', role)
+    loginWithRedirect({ appState: { returnTo: '/' } })
   }
 
   useEffect(() => {
@@ -69,7 +71,7 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
     <nav className="navbar">
       <div className={`navbar-inner ${!isAuthenticated ? 'navbar-inner--guest' : ''}`}>
 
-        {isConsumer && (
+        {isAuthenticated && (
           <button
             type="button"
             className="navbar-consumer-menu"
@@ -109,61 +111,10 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
           {!isAuthenticated && (
             <div className="navbar-auth-actions">
               <button className="navbar-btn-register" onClick={() => setRegisterOpen(true)}>Registrarse</button>
-              <button className="navbar-btn-login" onClick={() => loginWithRedirect()}>Iniciar sesión</button>
+              <button className="navbar-btn-login" onClick={() => setLoginOpen(true)}>Iniciar sesión</button>
             </div>
           )}
 
-          {isAuthenticated && !isConsumer && (
-            <div className="navbar-profile">
-              <button className="navbar-avatar" onClick={() => setProfileOpen(p => !p)}>
-                {user?.picture
-                  ? <img src={user.picture} alt={user.name} />
-                  : <User size={18} />
-                }
-              </button>
-
-              {profileOpen && (
-                <div className="navbar-dropdown">
-                  <div className="navbar-dropdown-header">
-                    <p className="navbar-dropdown-name">{user?.name}</p>
-                    <p className="navbar-dropdown-email">{user?.email}</p>
-                  </div>
-                  <div className="navbar-dropdown-divider" />
-
-                  <button onClick={() => go('/profile')}>
-                    <User size={15} /> Mi perfil
-                  </button>
-                  <button onClick={() => go('/orders')}>
-                    <ShoppingCart size={15} /> Mis pedidos
-                  </button>
-
-                  {isRestaurantOwner && (
-                    <button onClick={() => go('/restaurant-dashboard')}>
-                      <ClipboardList size={15} /> Panel del restaurante
-                    </button>
-                  )}
-
-                  <div className="navbar-dropdown-divider" />
-
-                  {isDriver && (
-                    <button onClick={() => go('/driver')}>
-                      <Bike size={15} /> Panel repartidor
-                    </button>
-                  )}
-                  {isAdmin && (
-                    <button onClick={() => go('/admin')}>
-                      <LayoutDashboard size={15} /> Dashboard admin
-                    </button>
-                  )}
-
-                  <div className="navbar-dropdown-divider" />
-                  <button className="navbar-dropdown-logout" onClick={handleLogout}>
-                    <LogOut size={15} /> Cerrar sesión
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Hamburguesa mobile */}
@@ -196,7 +147,7 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
           {!isAuthenticated
             ? <>
                 <button onClick={() => { setMenuOpen(false); setRegisterOpen(true) }}>Registrarse</button>
-                <button onClick={() => loginWithRedirect()}>Iniciar sesión</button>
+                <button onClick={() => { setMenuOpen(false); setLoginOpen(true) }}>Iniciar sesión</button>
               </>
             : <>
                 <Link to="/profile" onClick={() => setMenuOpen(false)}>Mi perfil</Link>
@@ -243,6 +194,22 @@ export default function Navbar({ cartCount, searchValue = '', onSearchChange, di
                 <span><strong>Repartidor</strong><small>Regístrate para realizar entregas.</small></span>
                 <ArrowRight size={17} />
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {loginOpen && (
+        <div className="register-choice-overlay" onClick={event => event.target === event.currentTarget && setLoginOpen(false)}>
+          <div className="register-choice-modal" role="dialog" aria-modal="true" aria-labelledby="login-choice-title">
+            <button className="register-choice-close" onClick={() => setLoginOpen(false)} aria-label="Cerrar"><X size={19} /></button>
+            <span className="register-choice-kicker">Bienvenido de vuelta</span>
+            <h2 id="login-choice-title">¿Cómo quieres ingresar?</h2>
+            <p>Elige el tipo de cuenta. Validaremos el acceso con el rol registrado en tu sesión.</p>
+            <div className="register-choice-grid">
+              <button onClick={() => loginAs('CONSUMER')}><span className="register-choice-icon"><User size={22} /></span><span><strong>Consumidor</strong><small>Para pedir comida o reservar una mesa.</small></span><ArrowRight size={17} /></button>
+              <button onClick={() => loginAs('RESTAURANT_OWNER')}><span className="register-choice-icon"><UtensilsCrossed size={22} /></span><span><strong>Restaurante</strong><small>Para gestionar tu restaurante.</small></span><ArrowRight size={17} /></button>
+              <button onClick={() => loginAs('DELIVERY')}><span className="register-choice-icon"><Bike size={22} /></span><span><strong>Repartidor</strong><small>Para ver y tomar pedidos disponibles.</small></span><ArrowRight size={17} /></button>
             </div>
           </div>
         </div>
