@@ -51,6 +51,11 @@ export default function Checkout() {
     else if (rawAddress) toast('Ubicación marcada. Revisa el distrito antes de continuar.', { icon: '📍' })
   }
 
+  const reverseGeocode = async ({ latitude, longitude }) => {
+    const { data } = await api.get('/api/v1/orders/reverse-geocode', { params: { latitude, longitude } })
+    return data.data
+  }
+
   // Redirigir si el carrito está vacío
   if (items.length === 0) {
     navigate('/cart')
@@ -200,6 +205,7 @@ export default function Checkout() {
                     value={deliveryCoords}
                     onChange={setDeliveryCoords}
                     onAddressResolved={fillDeliveryAddressFromMap}
+                    reverseGeocode={reverseGeocode}
                     requestLocationOnMount
                     instruction="Elige el punto en el mapa o usa tu ubicación actual. Completaremos dirección y distrito automáticamente."
                   />

@@ -17,32 +17,26 @@ function MapInteraction({ value, onSelect }) {
   return value?.latitude && value?.longitude ? <Marker position={[value.latitude, value.longitude]} icon={markerIcon}/> : null
 }
 
-export default function RestaurantLocationPicker({ value, onChange, onAddressResolved, requestLocationOnMount = false, instruction = 'Marca exactamente la entrada del restaurante.' }) {
+export default function RestaurantLocationPicker({ value, onChange, onAddressResolved, reverseGeocode, requestLocationOnMount = false, instruction = 'Marca exactamente la entrada del restaurante.' }) {
   const [error, setError] = useState('')
   const [resolvingAddress, setResolvingAddress] = useState(false)
   const hasRequestedLocation = useRef(false)
 
   const selectLocation = useCallback(async ({ latitude, longitude }) => {
     onChange({ latitude, longitude })
-    if (!onAddressResolved) return
+    if (!onAddressResolved || !reverseGeocode) return
 
     setResolvingAddress(true)
     try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&addressdetails=1`)
-      if (!response.ok) throw new Error('No se pudo consultar la dirección')
-      const result = await response.json()
-      const address = result.address || {}
-      const streetAddress = [address.road, address.house_number].filter(Boolean).join(' ')
-        || result.display_name?.split(',').slice(0, 2).join(',').trim()
-      const district = address.city_district || address.suburb || address.neighbourhood || address.municipality || address.district || address.city || ''
-      onAddressResolved({ address: streetAddress || '', district, rawAddress: result.display_name || '' })
+      const result = await reverseGeocode({ latitude, longitude })
+      onAddressResolved(result)
     } catch {
       // La ubicación sigue siendo válida aunque el proveedor no devuelva texto.
       setError('Ubicación marcada. Completa manualmente dirección y distrito si no se cargaron.')
     } finally {
       setResolvingAddress(false)
     }
-  }, [onAddressResolved, onChange])
+  }, [onAddressResolved, onChange, reverseGeocode])
 
   const locate = useCallback(() => {
     if (!navigator.geolocation) return setError('Tu dispositivo no permite obtener la ubicación')
