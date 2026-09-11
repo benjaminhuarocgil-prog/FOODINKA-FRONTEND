@@ -66,3 +66,4 @@
   .dashboard-content { padding: 20px 16px; }
   .dashboard-topbar  { padding: 16px; }
 }
+.dashboard-login-admin{border:0;border-radius:10px;padding:11px 17px;background:#e85d24;color:#fff;font-weight:700;cursor:pointer}

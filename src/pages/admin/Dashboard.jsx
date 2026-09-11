@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
-import { Navigate } from 'react-router-dom'
+import { ShieldAlert } from 'lucide-react'
 import AdminSidebar from '../../components/admin/AdminSidebar.jsx'
 import AdminMetrics from '../../components/admin/AdminMetrics.jsx'
 import AdminRestaurants from '../../components/admin/AdminRestaurants.jsx'
@@ -9,6 +9,7 @@ import AdminOrders from '../../components/admin/AdminOrders.jsx'
 import AdminPayments from '../../components/admin/AdminPayments.jsx'
 import AdminDrivers from '../../components/admin/AdminDrivers.jsx'
 import './Dashboard.css'
+import { useCurrentUser } from '../../hooks/useCurrentUser.js'
 
 const SECTIONS = {
   metrics:     { label: 'Dashboard',     component: AdminMetrics },
@@ -20,13 +21,26 @@ const SECTIONS = {
 }
 
 export default function Dashboard() {
-  const { user, isLoading } = useAuth0()
+  const { user, isLoading, isAuthenticated, loginWithRedirect } = useAuth0()
+  const { data: currentUser, isLoading: userLoading } = useCurrentUser()
   const [active, setActive] = useState('metrics')
 
-  if (isLoading) return <div className="dashboard-loading">Cargando...</div>
+  if (isLoading || (isAuthenticated && userLoading)) return <div className="dashboard-loading">Cargando...</div>
 
-  // Protección básica — el middleware del backend protege los endpoints
-  // Aquí solo ocultamos la UI si el usuario no es admin
+  const loginAsAdmin = () => loginWithRedirect({
+    authorizationParams: { prompt: 'login' },
+    appState: { returnTo: '/admin/register' },
+  })
+
+  if (!isAuthenticated || currentUser?.role !== 'ADMIN') {
+    return <div className="dashboard-loading" style={{ minHeight: '100vh', flexDirection: 'column', gap: 14 }}>
+      <ShieldAlert size={46} color="#dc2626" strokeWidth={1.5}/>
+      <strong>No tienes acceso al panel de administrador</strong>
+      <span>Inicia sesión con el correo autorizado como administrador.</span>
+      <button className="dashboard-login-admin" onClick={loginAsAdmin}>Iniciar sesión como administrador</button>
+    </div>
+  }
+
   const Section = SECTIONS[active]?.component || AdminMetrics
 
   return (
