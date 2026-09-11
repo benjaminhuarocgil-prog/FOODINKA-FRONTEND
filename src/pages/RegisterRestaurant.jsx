@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import RestaurantLocationPicker from '../components/restaurant/RestaurantLocationPicker.jsx'
 import Navbar from '../components/layout/Navbar.jsx'
+import ImageUploader from '../components/ui/ImageUploader.jsx'
 import { useApi } from '../hooks/useApi.js'
 import { useCurrentUser } from '../hooks/useCurrentUser.js'
 import toast from 'react-hot-toast'
@@ -69,7 +70,7 @@ export default function RegisterRestaurant() {
 
   const [form, setForm] = useState({
     name: '', ruc: '', category: '', description: '',
-    address: '', addressReference: '', district: '', phone: '', latitude: null, longitude: null,
+    address: '', addressReference: '', district: '', phone: '', latitude: null, longitude: null, logoUrl: '',
   })
   const [rucStatus, setRucStatus] = useState(null) // null | 'checking' | 'valid' | 'invalid'
   const [rucData,   setRucData]   = useState(null)
@@ -79,6 +80,26 @@ export default function RegisterRestaurant() {
   const [done,      setDone]      = useState(false)
 
   const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }))
+
+  const fillAddressFromMap = ({ address, district }) => {
+    const normalize = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+    const detected = normalize(district)
+    const aliases = { 'santiago de surco': 'Surco', 'lima cercado': 'Cercado de Lima' }
+    const matchedDistrict = aliases[detected] || DISTRICTS.find(item => {
+      const option = normalize(item)
+      return detected === option || detected.includes(option) || option.includes(detected)
+    })
+    setForm(current => ({
+      ...current,
+      ...(address ? { address } : {}),
+      ...(matchedDistrict ? { district: matchedDistrict } : {}),
+    }))
+  }
+
+  const reverseGeocode = async ({ latitude, longitude }) => {
+    const { data } = await api.get('/api/v1/orders/reverse-geocode', { params: { latitude, longitude } })
+    return data.data
+  }
 
   // ── Verificar RUC con SUNAT ────────────────────────────────
   const handleRucChange = async (e) => {
@@ -131,6 +152,7 @@ export default function RegisterRestaurant() {
         phone:       form.phone || undefined,
         latitude:    form.latitude,
         longitude:   form.longitude,
+        logoUrl:     form.logoUrl || undefined,
       })
       // Invalidar cache del usuario para que Navbar actualice el rol
       qc.invalidateQueries({ queryKey: ['current-user'] })
@@ -319,6 +341,11 @@ export default function RegisterRestaurant() {
                 rows={3}
               />
             </div>
+
+            <div className="rr-field">
+              <label className="rr-label">Logo o foto del restaurante <span className="rr-optional">(opcional)</span></label>
+              <ImageUploader value={form.logoUrl} onUploaded={url => setForm(current => ({ ...current, logoUrl: url }))} scope="restaurants/logos" label="Subir logo o foto" />
+            </div>
           </div>
 
           {/* ── Ubicación ───────────────────────────────────── */}
@@ -352,7 +379,12 @@ export default function RegisterRestaurant() {
 
             <div className="rr-field">
               <label className="rr-label">Ubicación exacta en el mapa <span className="rr-req">*</span></label>
-              <RestaurantLocationPicker value={{ latitude: form.latitude, longitude: form.longitude }} onChange={coords => setForm(current => ({ ...current, ...coords }))}/>
+              <RestaurantLocationPicker
+                value={{ latitude: form.latitude, longitude: form.longitude }}
+                onChange={coords => setForm(current => ({ ...current, ...coords }))}
+                onAddressResolved={fillAddressFromMap}
+                reverseGeocode={reverseGeocode}
+              />
             </div>
 
             <div className="rr-field rr-field--half">

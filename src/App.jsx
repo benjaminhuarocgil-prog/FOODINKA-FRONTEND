@@ -18,6 +18,7 @@ import RestaurantPortal    from './pages/RestaurantPortal.jsx'
 import RegisterRestaurant  from './pages/RegisterRestaurant.jsx'
 import Profile from './pages/Profile.jsx'
 import PaymentResult from './pages/PaymentResult.jsx'
+import RegisterAdmin from './pages/RegisterAdmin.jsx'
 
 function AppRoutes() {
   useOnboarding()
@@ -30,6 +31,7 @@ function AppRoutes() {
       <Route path="/checkout"              element={<Checkout />} />
       <Route path="/onboarding"            element={<Onboarding />} />
       <Route path="/admin"                 element={<Dashboard />} />
+      <Route path="/admin/register"        element={<RegisterAdmin />} />
       <Route path="/become-driver"         element={<BecomeDriver />} />
       <Route path="/driver"                element={<DriverDashboard />} />
       <Route path="/orders"                element={<MyOrders />} />

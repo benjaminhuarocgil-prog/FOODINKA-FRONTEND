@@ -41,6 +41,22 @@ export default function RestaurantRegisterForm({ onSubmit, onBack, loading }) {
 
   const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }))
 
+  const fillAddressFromMap = ({ address, district }) => {
+    const normalize = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+    const detected = normalize(district)
+    const aliases = { 'santiago de surco': 'Surco', 'lima cercado': 'Cercado de Lima' }
+    const matchedDistrict = aliases[detected] || DISTRICTS.find(item => {
+      const option = normalize(item)
+      return detected === option || detected.includes(option) || option.includes(detected)
+    })
+    setForm(current => ({ ...current, ...(address ? { address } : {}), ...(matchedDistrict ? { district: matchedDistrict } : {}) }))
+  }
+
+  const reverseGeocode = async ({ latitude, longitude }) => {
+    const { data } = await api.get('/api/v1/orders/reverse-geocode', { params: { latitude, longitude } })
+    return data.data
+  }
+
   // Verificar RUC cuando tiene 11 dígitos
   const handleRucChange = async (e) => {
     const val = e.target.value.replace(/\D/g, '').slice(0, 11)
@@ -199,7 +215,12 @@ export default function RestaurantRegisterForm({ onSubmit, onBack, loading }) {
 
       <div className="rrform-field">
         <label className="rrform-label">Ubicación exacta en el mapa *</label>
-        <RestaurantLocationPicker value={{ latitude: form.latitude, longitude: form.longitude }} onChange={coords => setForm(current => ({ ...current, ...coords }))}/>
+        <RestaurantLocationPicker
+          value={{ latitude: form.latitude, longitude: form.longitude }}
+          onChange={coords => setForm(current => ({ ...current, ...coords }))}
+          onAddressResolved={fillAddressFromMap}
+          reverseGeocode={reverseGeocode}
+        />
       </div>
 
       {/* Teléfono */}

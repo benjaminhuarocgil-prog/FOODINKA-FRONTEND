@@ -5,6 +5,7 @@ import { Loader2, ArrowLeft, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useApi } from '../hooks/useApi.js'
 import Navbar from '../components/layout/Navbar.jsx'
+import ImageUploader from '../components/ui/ImageUploader.jsx'
 import './BecomeDriver.css'
 
 const VEHICLE_TYPES = [
@@ -108,8 +109,8 @@ export default function BecomeDriver() {
           </div>
 
           <div className="bdriver-field">
-            <label>URL foto del DNI <span className="bdriver-hint">(sube la imagen a Cloudinary o similar)</span></label>
-            <input className="bdriver-input" placeholder="https://..." value={form.dniPhotoUrl} onChange={set('dniPhotoUrl')} />
+            <label>Foto del DNI <span className="bdriver-hint">(opcional)</span></label>
+            <ImageUploader value={form.dniPhotoUrl} onUploaded={url => setForm(f => ({ ...f, dniPhotoUrl: url }))} scope="drivers/dni" label="Adjuntar foto del DNI" />
           </div>
         </div>
 
@@ -127,13 +128,13 @@ export default function BecomeDriver() {
             </div>
 
             <div className="bdriver-field">
-              <label>URL foto del carné *</label>
-              <input className="bdriver-input" placeholder="https://..." value={form.licensePhotoUrl} onChange={set('licensePhotoUrl')} />
+              <label>Foto del carné *</label>
+              <ImageUploader value={form.licensePhotoUrl} onUploaded={url => setForm(f => ({ ...f, licensePhotoUrl: url }))} scope="drivers/licenses" label="Adjuntar foto del carné" />
             </div>
 
             <div className="bdriver-field">
-              <label>URL foto del vehículo <span className="bdriver-hint">(opcional)</span></label>
-              <input className="bdriver-input" placeholder="https://..." value={form.vehiclePhotoUrl} onChange={set('vehiclePhotoUrl')} />
+              <label>Foto del vehículo <span className="bdriver-hint">(opcional)</span></label>
+              <ImageUploader value={form.vehiclePhotoUrl} onUploaded={url => setForm(f => ({ ...f, vehiclePhotoUrl: url }))} scope="drivers/vehicles" label="Adjuntar foto del vehículo" />
             </div>
           </div>
         )}
@@ -142,8 +143,8 @@ export default function BecomeDriver() {
           <div className="bdriver-card">
             <h2 className="bdriver-section">3. Foto del vehículo</h2>
             <div className="bdriver-field">
-              <label>URL foto del vehículo <span className="bdriver-hint">(opcional)</span></label>
-              <input className="bdriver-input" placeholder="https://..." value={form.vehiclePhotoUrl} onChange={set('vehiclePhotoUrl')} />
+              <label>Foto del vehículo <span className="bdriver-hint">(opcional)</span></label>
+              <ImageUploader value={form.vehiclePhotoUrl} onUploaded={url => setForm(f => ({ ...f, vehiclePhotoUrl: url }))} scope="drivers/vehicles" label="Adjuntar foto del vehículo" />
             </div>
           </div>
         )}
