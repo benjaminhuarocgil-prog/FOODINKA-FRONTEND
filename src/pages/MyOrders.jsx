@@ -17,48 +17,6 @@ const FILTER_OPTIONS = [
   { value: 'CANCELLED',  label: 'Cancelados' },
 ]
 
-function CRMStats({ crm }) {
-  if (!crm) return null
-  return (
-    <div className="myorders-crm">
-      <div className="myorders-crm-card">
-        <p className="myorders-crm-value">{crm.totalOrders}</p>
-        <p className="myorders-crm-label">Total pedidos</p>
-      </div>
-      <div className="myorders-crm-card">
-        <p className="myorders-crm-value">S/ {crm.totalSpent?.toFixed(2)}</p>
-        <p className="myorders-crm-label">Total gastado</p>
-      </div>
-      <div className="myorders-crm-card">
-        <p className="myorders-crm-value">
-          {crm.totalOrders > 0
-            ? `S/ ${(crm.totalSpent / crm.totalOrders).toFixed(2)}`
-            : 'S/ 0.00'
-          }
-        </p>
-        <p className="myorders-crm-label">Ticket promedio</p>
-      </div>
-      {crm.topRestaurants?.length > 0 && (
-        <div className="myorders-crm-card" style={{ gridColumn: '1 / -1' }}>
-          <p className="myorders-crm-label" style={{ marginBottom: 8 }}>⭐ Tus favoritos</p>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {crm.topRestaurants.map(r => (
-              <span key={r.id} style={{
-                background: '#fff7f4', color: '#e85d24',
-                fontSize: '0.78rem', fontWeight: 600,
-                padding: '4px 10px', borderRadius: 99,
-                border: '1px solid #fed7aa',
-              }}>
-                {r.name}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
 function OrderCard({ order, onClick }) {
   const [selectedScore, setSelectedScore] = useState(0)
   const rateDriver = useRateDriver()
@@ -144,7 +102,6 @@ export default function MyOrders() {
 
   const orders     = data?.data || []
   const totalPages = data?.pagination?.totalPages || 1
-  const crm        = data?.crm
 
   const active  = orders.filter(o => !['DELIVERED', 'CANCELLED'].includes(o.status))
   const history = orders.filter(o =>  ['DELIVERED', 'CANCELLED'].includes(o.status))
@@ -154,9 +111,6 @@ export default function MyOrders() {
       <Navbar />
       <div className="myorders-inner">
         <h1 className="myorders-title">Mis pedidos</h1>
-
-        {/* CRM Stats */}
-        {!isLoading && <CRMStats crm={crm} />}
 
         {/* Filtros */}
         <div className="myorders-filters">

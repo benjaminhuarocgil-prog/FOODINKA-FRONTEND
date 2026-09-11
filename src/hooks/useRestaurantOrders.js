@@ -56,3 +56,32 @@ export function useUpdateOrderStatus() {
     },
   })
 }
+
+export function useRestaurantCustomers(restaurantId, params = {}) {
+  const { isAuthenticated, getAccessTokenSilently } = useAuth0()
+
+  return useQuery({
+    queryKey: ['restaurant-customers', restaurantId, params],
+    queryFn: async () => {
+      await getToken(getAccessTokenSilently)
+      const { data } = await api.get(`/api/v1/restaurants/${restaurantId}/customers`, { params })
+      return data
+    },
+    enabled: isAuthenticated && !!restaurantId,
+    placeholderData: previous => previous,
+  })
+}
+
+export function useRestaurantCustomerDetail(restaurantId, customerId) {
+  const { isAuthenticated, getAccessTokenSilently } = useAuth0()
+
+  return useQuery({
+    queryKey: ['restaurant-customer', restaurantId, customerId],
+    queryFn: async () => {
+      await getToken(getAccessTokenSilently)
+      const { data } = await api.get(`/api/v1/restaurants/${restaurantId}/customers/${customerId}`)
+      return data.data
+    },
+    enabled: isAuthenticated && !!restaurantId && !!customerId,
+  })
+}

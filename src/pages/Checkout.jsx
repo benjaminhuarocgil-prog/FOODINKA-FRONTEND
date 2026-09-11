@@ -6,7 +6,7 @@ import { useCartStore } from '../store/cartStore.js'
 import { useApi } from '../hooks/useApi.js'
 import Navbar from '../components/layout/Navbar.jsx'
 import OrderTypeSelector from '../components/checkout/OrderTypeSelector.jsx'
-import DeliveryForm from '../components/checkout/DeliveryForm.jsx'
+import DeliveryForm, { DELIVERY_DISTRICTS } from '../components/checkout/DeliveryForm.jsx'
 import ReservationForm from '../components/checkout/ReservationForm.jsx'
 import RestaurantLocationPicker from '../components/restaurant/RestaurantLocationPicker.jsx'
 import OrderSummary from '../components/checkout/OrderSummary.jsx'
@@ -36,6 +36,20 @@ export default function Checkout() {
 
   const subtotal   = getSubtotal()
   const totalItems = getTotalItems()
+
+  const fillDeliveryAddressFromMap = ({ address, district, rawAddress }) => {
+    if (address) setDeliveryAddress(address)
+
+    const normalise = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+    const detected = normalise(district)
+    const aliases = { 'santiago de surco': 'Surco', 'cercado de lima': 'Cercado de Lima', 'lima cercado': 'Cercado de Lima', 'san juan de miraflores': 'San Juan de Miraflores' }
+    const selectedDistrict = aliases[detected] || DELIVERY_DISTRICTS.find(item => {
+      const option = normalise(item)
+      return detected === option || detected.includes(option) || option.includes(detected)
+    })
+    if (selectedDistrict) setDeliveryDistrict(selectedDistrict)
+    else if (rawAddress) toast('Ubicación marcada. Revisa el distrito antes de continuar.', { icon: '📍' })
+  }
 
   // Redirigir si el carrito está vacío
   if (items.length === 0) {
@@ -185,7 +199,9 @@ export default function Checkout() {
                   <RestaurantLocationPicker
                     value={deliveryCoords}
                     onChange={setDeliveryCoords}
-                    instruction="Marca el punto exacto donde el repartidor debe entregarte el pedido."
+                    onAddressResolved={fillDeliveryAddressFromMap}
+                    requestLocationOnMount
+                    instruction="Elige el punto en el mapa o usa tu ubicación actual. Completaremos dirección y distrito automáticamente."
                   />
                 </>
               )}

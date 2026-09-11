@@ -1,6 +1,6 @@
 import './CheckoutForm.css'
 
-const DISTRICTS = [
+export const DELIVERY_DISTRICTS = [
   'Miraflores','San Isidro','Barranco','Surco','La Molina',
   'San Borja','Cercado de Lima','Lince','Jesús María','Magdalena',
   'San Miguel','Pueblo Libre','Breña','Rímac','Los Olivos',
@@ -35,7 +35,7 @@ export default function DeliveryForm({
           onChange={e => onDistrictChange(e.target.value)}
         >
           <option value="">Selecciona un distrito</option>
-          {DISTRICTS.map(d => (
+          {DELIVERY_DISTRICTS.map(d => (
             <option key={d} value={d}>{d}</option>
           ))}
         </select>

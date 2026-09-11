@@ -8,7 +8,7 @@ import {
   ShoppingBag, Star, Store, TrendingUp, Users, X,
 } from 'lucide-react'
 import { useCurrentUser } from '../hooks/useCurrentUser.js'
-import { useRestaurantOrders, useUpdateOrderStatus } from '../hooks/useRestaurantOrders.js'
+import { useRestaurantCustomers, useRestaurantCustomerDetail, useRestaurantOrders, useUpdateOrderStatus } from '../hooks/useRestaurantOrders.js'
 import { useApplyProductDiscount, useRestaurantProducts } from '../hooks/useProfile.js'
 import { SectionMenu, SectionRestaurant } from './Profile.jsx'
 import './Profile.css'
@@ -16,6 +16,7 @@ import './RestaurantPortal.css'
 
 const SECTIONS = [
   { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+  { id: 'clientes', label: 'Clientes', icon: Users },
   { id: 'menu', label: 'Menú', icon: BookOpen },
   { id: 'preparacion', label: 'Preparación de menú', icon: CookingPot },
   { id: 'ventas', label: 'Datos de venta', icon: ClipboardList },
@@ -120,6 +121,40 @@ function Sales({ orders }) {
   </section>
 }
 
+function Customers({ restaurantId, onSelect }) {
+  const [search, setSearch] = useState('')
+  const [sort, setSort] = useState('highest')
+  const { data, isLoading } = useRestaurantCustomers(restaurantId, { search, sort })
+  const customers = data?.data || []
+
+  return <section className="rp-panel">
+    <div className="rp-panel-head"><div><h1>Clientes</h1><p>Consumo registrado únicamente en tu restaurante.</p></div><Users size={21}/></div>
+    <div className="rp-toolbar">
+      <label><Search size={16}/><input value={search} onChange={event => setSearch(event.target.value)} placeholder="Buscar por nombre o correo"/></label>
+      <select value={sort} onChange={event => setSort(event.target.value)}><option value="highest">Clientes que más consumen</option><option value="lowest">Clientes que menos consumen</option><option value="name">Nombre (A-Z)</option></select>
+    </div>
+    {isLoading ? <p>Cargando clientes…</p> : customers.length === 0 ? <Empty>No hay clientes que coincidan con este filtro.</Empty> : <div className="rp-customer-list">{customers.map(customer => <button className="rp-customer-card" key={customer.id} onClick={() => onSelect(customer)}>
+      {customer.avatarUrl ? <img src={customer.avatarUrl} alt=""/> : <span className="rp-user-avatar">{(customer.name || 'U')[0]}</span>}
+      <span className="rp-customer-main"><strong>{customer.name || 'Cliente'}</strong><small>{customer.totalOrders} pedido{customer.totalOrders === 1 ? '' : 's'} · {customer.deliveryOrders} delivery · {customer.reservationOrders} cita{customer.reservationOrders === 1 ? '' : 's'}</small></span>
+      <span className="rp-customer-spend"><strong>{money(customer.totalSpent)}</strong><small>Ticket prom. {money(customer.averageTicket)}</small></span><ChevronRight size={18}/>
+    </button>)}</div>}
+  </section>
+}
+
+function CustomerDetail({ detail, isLoading, onClose }) {
+  if (isLoading) return <div className="rp-ticket-overlay"><article className="rp-ticket"><p>Cargando cliente…</p></article></div>
+  if (!detail) return null
+  const { customer, stats, orders } = detail
+  return <div className="rp-ticket-overlay" onClick={onClose}><article className="rp-customer-detail" onClick={event => event.stopPropagation()}>
+    <button className="rp-ticket-close" onClick={onClose}><X/></button>
+    <div className="rp-customer-detail-head">{customer.avatarUrl ? <img src={customer.avatarUrl} alt=""/> : <span className="rp-user-avatar">{(customer.name || 'U')[0]}</span>}<div><h2>{customer.name}</h2><p>{customer.email}</p></div></div>
+    <div className="rp-customer-stats"><div><small>Total gastado aquí</small><strong>{money(stats.totalSpent)}</strong></div><div><small>Ticket promedio</small><strong>{money(stats.averageTicket)}</strong></div><div><small>Pedidos / citas</small><strong>{stats.totalOrders}</strong></div></div>
+    <div className="rp-customer-breakdown"><span>🛵 Delivery: <b>{stats.delivery.orders}</b> · {money(stats.delivery.totalSpent)}</span><span>📅 Citas: <b>{stats.reservation.orders}</b> · {money(stats.reservation.totalSpent)}</span></div>
+    <h3>Historial en tu restaurante</h3>
+    <div className="rp-customer-orders">{orders.map(order => <div key={order.id}><span><b>#{order.orderNumber?.slice(-8)}</b><small>{peruDate(order.createdAt)} · {order.type === 'DELIVERY' ? 'Delivery' : 'Cita'}</small></span><strong>{money(order.total)}</strong></div>)}</div>
+  </article></div>
+}
+
 function MenuPreparation({ orders }) {
   const updateStatus = useUpdateOrderStatus()
   const deliveryOrders = orders.filter(order => order.type === 'DELIVERY' && ['PENDING', 'CONFIRMED', 'PREPARING', 'READY'].includes(order.status))
@@ -205,7 +240,9 @@ export default function RestaurantPortal() {
   const { data: user, isLoading: userLoading } = useCurrentUser()
   const restaurant = user?.restaurant
   const [section, setSection] = useState('dashboard')
+  const [selectedCustomer, setSelectedCustomer] = useState(null)
   const { data, isLoading: ordersLoading } = useRestaurantOrders(restaurant?.id, { page: 1, limit: 500 })
+  const { data: customerDetail, isLoading: customerDetailLoading } = useRestaurantCustomerDetail(restaurant?.id, selectedCustomer?.id)
   const orders = data?.data || []
   const handleLogout = () => {
     sessionStorage.removeItem('foodinka_authenticated')
@@ -227,7 +264,8 @@ export default function RestaurantPortal() {
     </aside>
     <main className="rp-main"><header className="rp-topbar"><div><small>Panel del restaurante</small><strong>{SECTIONS.find(item => item.id === section)?.label}</strong></div></header>
       <div className="rp-content">{ordersLoading && section !== 'menu' && section !== 'promociones' ? <div className="rp-loading">Preparando tus datos…</div> : <>
-        {section === 'dashboard' && <Overview orders={orders} restaurant={restaurant}/>} {section === 'menu' && <SectionMenu restaurant={restaurant}/>} {section === 'preparacion' && <MenuPreparation orders={orders}/>} {section === 'ventas' && <Sales orders={orders}/>} {section === 'promociones' && <Promotions restaurantId={restaurant.id} orders={orders}/>} {section === 'facturacion' && <Billing orders={orders} restaurant={restaurant}/>} {section === 'configuracion' && <SectionRestaurant restaurant={restaurant}/>} </>}
+        {section === 'dashboard' && <Overview orders={orders} restaurant={restaurant}/>} {section === 'clientes' && <Customers restaurantId={restaurant.id} onSelect={setSelectedCustomer}/>} {section === 'menu' && <SectionMenu restaurant={restaurant}/>} {section === 'preparacion' && <MenuPreparation orders={orders}/>} {section === 'ventas' && <Sales orders={orders}/>} {section === 'promociones' && <Promotions restaurantId={restaurant.id} orders={orders}/>} {section === 'facturacion' && <Billing orders={orders} restaurant={restaurant}/>} {section === 'configuracion' && <SectionRestaurant restaurant={restaurant}/>} </>}
+        {selectedCustomer && <CustomerDetail detail={customerDetail} isLoading={customerDetailLoading} onClose={() => setSelectedCustomer(null)}/>}
       </div>
     </main>
   </div>
